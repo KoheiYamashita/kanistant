@@ -25,23 +25,18 @@ Builds:
     subdir: android/app
     sudo:
       - apt-get update
-      - apt-get install -y make wget
-    init: "cd ../..\n# Extract Go version from go.mod\nGO_VERSION=$(grep '^go ' go.mod
-      | awk '{print $2}')\n# Download and install Go\nwget -q https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz\n
-      tar -C $HOME -xzf go${GO_VERSION}.linux-amd64.tar.gz\nrm go${GO_VERSION}.linux-amd64.tar.gz"
+      - apt-get install -y make golang
     gradle:
       - embedded
-    prebuild: "cd ../..\nexport PATH=$HOME/go/bin:$PATH\nexport GOPATH=$HOME/gopath\n
-      # Build Go backend for all Android architectures\nmake build-android"
-    scanignore:
-      - android/app/src/embedded/jniLibs/arm64-v8a/libclawdroid.so
-      - android/app/src/embedded/jniLibs/armeabi-v7a/libclawdroid.so
-      - android/app/src/embedded/jniLibs/x86_64/libclawdroid.so
+    build:
+      - cd ../..
+      - export GOTOOLCHAIN=auto
+      - export GOPATH=$HOME/gopath
+      - make build-android
     ndk: r27c
 
-AutoUpdateMode: Version %v
-UpdateCheckMode: HTTP
-UpdateCheckData: 
-  https://raw.githubusercontent.com/KarakuriAgent/clawdroid/main/android/app/build.gradle.kts|versionCode\s*=\s*(\d+)|https://raw.githubusercontent.com/KarakuriAgent/clawdroid/main/VERSION|(.+)
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: android/app/build.gradle.kts|versionCode\s*=\s*(\d+)|VERSION|(.+)
 CurrentVersion: 0.4.0
 CurrentVersionCode: 4
