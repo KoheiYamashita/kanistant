@@ -34,9 +34,8 @@ Builds:
       - make build-android
     ndk: r27c
 
-AutoUpdateMode: Version %v
-UpdateCheckMode: HTTP
-UpdateCheckData: 
-  https://raw.githubusercontent.com/KarakuriAgent/clawdroid/main/android/app/build.gradle.kts|versionCode\s*=\s*(\d+)|https://raw.githubusercontent.com/KarakuriAgent/clawdroid/main/VERSION|(.+)
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: android/app/build.gradle.kts|versionCode\s*=\s*(\d+)|VERSION|(.+)
 CurrentVersion: 0.4.0
 CurrentVersionCode: 4
