@@ -30,6 +30,7 @@ Builds:
       - embedded
     build:
       - cd ../..
+      - export GOTOOLCHAIN=auto
       - export GOPATH=$HOME/gopath
       - make build-android
     ndk: r27c
