@@ -25,15 +25,11 @@ Builds:
     subdir: android/app
     sudo:
       - apt-get update
-      - apt-get install -y make wget
-    init: "cd ../..\n# Extract Go version from go.mod\nGO_VERSION=$(grep '^go ' go.mod
-      | awk '{print $2}')\n# Download and install Go\nwget -q https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz\n
-      tar -C $HOME -xzf go${GO_VERSION}.linux-amd64.tar.gz\nrm go${GO_VERSION}.linux-amd64.tar.gz"
+      - apt-get install -y make golang
     gradle:
       - embedded
     build:
       - cd ../..
-      - export PATH=$HOME/go/bin:$PATH
       - export GOPATH=$HOME/gopath
       - make build-android
     ndk: r27c
