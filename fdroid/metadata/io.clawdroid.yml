@@ -12,6 +12,8 @@ SourceCode: https://github.com/KarakuriAgent/clawdroid
 IssueTracker: https://github.com/KarakuriAgent/clawdroid/issues
 Changelog: https://github.com/KarakuriAgent/clawdroid/releases
 
+AutoName: ClawDroid
+
 RepoType: git
 Repo: https://github.com/KarakuriAgent/clawdroid.git
 
@@ -25,12 +27,16 @@ Builds:
       - apt-get update
       - apt-get install -y make wget
     init: "cd ../..\n# Extract Go version from go.mod\nGO_VERSION=$(grep '^go ' go.mod
-      | awk '{print $2}')\n# Download and install Go\nwget -q https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz\n\
+      | awk '{print $2}')\n# Download and install Go\nwget -q https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz\n
       tar -C $HOME -xzf go${GO_VERSION}.linux-amd64.tar.gz\nrm go${GO_VERSION}.linux-amd64.tar.gz"
     gradle:
       - embedded
-    prebuild: "cd ../..\nexport PATH=$HOME/go/bin:$PATH\nexport GOPATH=$HOME/gopath\n\
+    prebuild: "cd ../..\nexport PATH=$HOME/go/bin:$PATH\nexport GOPATH=$HOME/gopath\n
       # Build Go backend for all Android architectures\nmake build-android"
+    scanignore:
+      - android/app/src/embedded/jniLibs/arm64-v8a/libclawdroid.so
+      - android/app/src/embedded/jniLibs/armeabi-v7a/libclawdroid.so
+      - android/app/src/embedded/jniLibs/x86_64/libclawdroid.so
     ndk: r27c
 
 AutoUpdateMode: Version %v
