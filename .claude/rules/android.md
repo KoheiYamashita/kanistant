@@ -64,3 +64,12 @@ Gradle マルチモジュール構成:
 - `WebSocketClient` が `StateFlow<ConnectionState>` と `SharedFlow<WsOutgoing>` を公開
 - 指数バックオフによる自動再接続
 - メッセージタイプ（`status`, `tool_request`, `exit` 等）で分岐処理
+
+## 開発ワークフロー
+
+コード修正後は以下を実行して確認すること:
+1. `cd android && ./gradlew lint` — Lint チェック
+2. `cd android && ./gradlew test` — ユニットテスト実行
+3. `cd android && ./gradlew assembleEmbeddedDebug` — ビルド確認
+
+コードを修正したら、関連するテストも合わせて修正・追加すること。

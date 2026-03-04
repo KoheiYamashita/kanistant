@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ClawDroid は Go バックエンドを内蔵した Android AI アシスタント。Go シングルバイナリ（エージェントループ・ツール実行・LLM 呼び出し・メッセージングチャンネル）と Kotlin/Jetpack Compose フロントエンド（チャット UI・音声モード・デバイス自動操作）で構成される。
 
+## 作業ルール
+
+コードを修正する前に、必ずプランモードでプランを作成し、ユーザーの承認を得てから実装に入ること。
+
 ## ビルド・テストコマンド
 
 ### Go バックエンド
