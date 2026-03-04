@@ -1,10 +1,10 @@
 ---
 paths:
-  - "cmd/**/*.go"
-  - "pkg/**/*.go"
+  - "cmd/**"
+  - "pkg/**"
+  - "Makefile"
   - "go.mod"
   - "go.sum"
-  - "Makefile"
 ---
 
 # Go バックエンド

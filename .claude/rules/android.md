@@ -1,9 +1,6 @@
 ---
 paths:
-  - "android/**/*.kt"
-  - "android/**/*.kts"
-  - "android/**/*.xml"
-  - "android/**/*.gradle*"
+  - "android/**"
 ---
 
 # Android フロントエンド
