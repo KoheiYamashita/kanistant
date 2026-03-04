@@ -70,6 +70,11 @@ func BuildSchema(defaultCfg *config.Config) SchemaResponse {
 			continue
 		}
 
+		// Version is internal; not user-editable.
+		if jsonTag == "version" {
+			continue
+		}
+
 		section := SchemaSection{
 			Key:   jsonTag,
 			Label: labelTag(field),

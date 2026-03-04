@@ -52,6 +52,7 @@ type AgentLoop struct {
 	activeProcs    map[string]*activeProcess
 	procsMu        sync.Mutex
 	mediaDir       string
+	queueMessages  bool
 }
 
 type activeProcess struct {
@@ -243,6 +244,7 @@ func NewAgentLoop(cfg *config.Config, msgBus *bus.MessageBus, provider providers
 		mcpManager:     mcpManager,
 		activeProcs:    make(map[string]*activeProcess),
 		mediaDir:       mediaDir,
+		queueMessages:  cfg.Agents.Defaults.QueueMessages,
 	}
 }
 
@@ -264,18 +266,29 @@ func (al *AgentLoop) Run(ctx context.Context) error {
 				sessionKey = fmt.Sprintf("%s:%s", msg.Channel, msg.ChatID)
 			}
 
-			// Cancel active process for the same session
 			al.procsMu.Lock()
 			if active, exists := al.activeProcs[sessionKey]; exists {
-				active.cancel()
-				al.procsMu.Unlock()
-				select {
-				case <-active.done:
-				case <-time.After(5 * time.Second):
-					logger.WarnCF("agent", "Timed out waiting for cancelled process",
-						map[string]interface{}{"session_key": sessionKey})
+				if al.queueMessages {
+					// Queue mode: wait for completion
+					al.procsMu.Unlock()
+					select {
+					case <-active.done:
+					case <-ctx.Done():
+						return nil
+					}
+					al.procsMu.Lock()
+				} else {
+					// Cancel mode: cancel and replace
+					active.cancel()
+					al.procsMu.Unlock()
+					select {
+					case <-active.done:
+					case <-time.After(5 * time.Second):
+						logger.WarnCF("agent", "Timed out waiting for cancelled process",
+							map[string]interface{}{"session_key": sessionKey})
+					}
+					al.procsMu.Lock()
 				}
-				al.procsMu.Lock()
 			}
 
 			procCtx, procCancel := context.WithCancel(ctx)
@@ -615,9 +628,10 @@ func (al *AgentLoop) runAgentLoop(ctx context.Context, opts processOptions) (str
 	finalContent, iteration, err := al.runLLMIteration(ctx, messages, opts, &currentStatus)
 
 	if ctx.Err() != nil {
-		// Processing was cancelled (e.g., new message from same session)
-		al.sessions.AddMessage(opts.SessionKey, "assistant", "[応答は中断されました]")
-		_ = al.sessions.Save(opts.SessionKey)
+		if !al.queueMessages {
+			al.sessions.AddMessage(opts.SessionKey, "assistant", "[応答は中断されました]")
+			_ = al.sessions.Save(opts.SessionKey)
+		}
 		return "", nil
 	}
 

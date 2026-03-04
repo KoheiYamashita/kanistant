@@ -50,6 +50,7 @@ type LLMConfig struct {
 }
 
 type Config struct {
+	Version    int              `json:"version"`
 	LLM        LLMConfig        `json:"llm" label:"LLM"`
 	Agents     AgentsConfig     `json:"agents" label:"Agent Defaults"`
 	Channels   ChannelsConfig   `json:"channels" label:"Messaging Channels"`
@@ -72,6 +73,7 @@ type AgentDefaults struct {
 	ContextWindow       int     `json:"context_window" label:"Context Window" env:"CLAWDROID_AGENTS_DEFAULTS_CONTEXT_WINDOW"`
 	Temperature         float64 `json:"temperature" label:"Temperature" env:"CLAWDROID_AGENTS_DEFAULTS_TEMPERATURE"`
 	MaxToolIterations   int     `json:"max_tool_iterations" label:"Max Tool Iterations" env:"CLAWDROID_AGENTS_DEFAULTS_MAX_TOOL_ITERATIONS"`
+	QueueMessages       bool    `json:"queue_messages" label:"Queue Messages" env:"CLAWDROID_AGENTS_DEFAULTS_QUEUE_MESSAGES"`
 }
 
 type ChannelsConfig struct {
@@ -195,6 +197,7 @@ type ToolsConfig struct {
 
 func DefaultConfig() *Config {
 	return &Config{
+		Version: ConfigVersion,
 		LLM: LLMConfig{
 			Model: "",
 		},
@@ -295,12 +298,17 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, err
 	}
 
+	cfg.Version = 0 // Reset so missing "version" in JSON is treated as 0
 	if err := json.Unmarshal(data, cfg); err != nil {
 		return nil, err
 	}
 
 	if err := env.Parse(cfg); err != nil {
 		return nil, err
+	}
+
+	if migrateConfig(cfg) {
+		_ = saveConfigLocked(path, cfg)
 	}
 
 	return cfg, nil
@@ -340,6 +348,7 @@ func (c *Config) RUnlock() { c.mu.RUnlock() }
 // CopyFrom copies all configuration fields from src into c.
 // The caller must hold c's write lock. src's mutex is not acquired.
 func (c *Config) CopyFrom(src *Config) {
+	c.Version = src.Version
 	c.LLM = src.LLM
 	c.Agents = src.Agents
 	c.Channels = src.Channels
