@@ -3,6 +3,7 @@ AntiFeatures:
     en-US: Requires a third-party LLM API (OpenAI, Anthropic, etc.) to function.
     ja: 動作にサードパーティのLLM API（OpenAI、Anthropic等）が必要です。
 Categories:
+  - AI Chat
   - Internet
   - System
 License: MIT
@@ -23,13 +24,18 @@ Builds:
     subdir: android/app
     sudo:
       - apt-get update
-      - apt-get install -y make golang
+      - apt-get install -y golang-go make
     gradle:
       - embedded
+    srclibs:
+      - go@go1.25.6
     build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
       - cd ../..
-      - export GOTOOLCHAIN=auto
-      - export GOPATH=$HOME/gopath
       - make build-android
     ndk: r27c
 
