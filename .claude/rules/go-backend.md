@@ -70,7 +70,6 @@ paths:
 
 `//go:embed` でバイナリに埋め込まれるテンプレート:
 - `IDENTITY.md`, `SOUL.md`, `AGENT.md` — ボットの人格・動作指針
-- `USER.md` — ユーザー設定テンプレート
 - `HEARTBEAT.md` — ハートビートプロンプト
 
 ## 設定マイグレーション

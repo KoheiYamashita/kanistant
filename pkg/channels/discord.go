@@ -328,6 +328,7 @@ func (c *DiscordChannel) handleMessage(s *discordgo.Session, m *discordgo.Messag
 		"user_id":      senderID,
 		"username":     m.Author.Username,
 		"display_name": senderName,
+		"sender_name":  senderName,
 		"guild_id":     m.GuildID,
 		"channel_id":   m.ChannelID,
 		"is_dm":        fmt.Sprintf("%t", m.GuildID == ""),

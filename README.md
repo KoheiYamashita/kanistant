@@ -493,7 +493,7 @@ The workspace (`~/.clawdroid/data/`) contains template files that shape the agen
 | `IDENTITY.md` | Bot name, version, capabilities |
 | `SOUL.md` | Personality and values |
 | `AGENT.md` | Operational guidelines |
-| `USER.md` | User preferences and context |
+| `data/users.json` | User directory (multi-user profiles) |
 | `HEARTBEAT.md` | Heartbeat check template |
 
 ## Build from Source

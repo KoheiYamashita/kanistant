@@ -491,7 +491,7 @@ clawdroid skills remove <name>   # スキルの削除
 | `IDENTITY.md` | ボット名、バージョン、機能 |
 | `SOUL.md` | 性格と価値観 |
 | `AGENT.md` | 運用ガイドライン |
-| `USER.md` | ユーザーの好みとコンテキスト |
+| `data/users.json` | ユーザーディレクトリ（マルチユーザープロファイル） |
 | `HEARTBEAT.md` | ハートビートチェックのテンプレート |
 
 ## ソースからビルド

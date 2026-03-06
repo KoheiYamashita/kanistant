@@ -313,12 +313,17 @@ func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Mes
 		c.placeholders.Store(chatIDStr, pID)
 	}
 
+	senderName := user.FirstName
+	if user.LastName != "" {
+		senderName += " " + user.LastName
+	}
 	metadata := map[string]string{
-		"message_id": fmt.Sprintf("%d", message.MessageID),
-		"user_id":    fmt.Sprintf("%d", user.ID),
-		"username":   user.Username,
-		"first_name": user.FirstName,
-		"is_group":   fmt.Sprintf("%t", message.Chat.Type != "private"),
+		"message_id":  fmt.Sprintf("%d", message.MessageID),
+		"user_id":     fmt.Sprintf("%d", user.ID),
+		"username":    user.Username,
+		"first_name":  user.FirstName,
+		"sender_name": senderName,
+		"is_group":    fmt.Sprintf("%t", message.Chat.Type != "private"),
 	}
 
 	c.HandleMessage(fmt.Sprintf("%d", user.ID), fmt.Sprintf("%d", chatID), content, mediaPaths, metadata)

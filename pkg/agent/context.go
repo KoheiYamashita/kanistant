@@ -27,6 +27,7 @@ type ContextBuilder struct {
 	mcpManager        *mcp.Manager        // MCP server manager
 	enabledChannels   []string            // Active communication channels
 	memoryToolEnabled bool                // Whether memory tool is registered
+	userStore         *UserStore          // User directory
 }
 
 func getGlobalConfigDir() string {
@@ -81,6 +82,11 @@ func (cb *ContextBuilder) SetEnabledChannels(channels []string) {
 // When disabled, the system prompt switches to file-path-based memory instructions.
 func (cb *ContextBuilder) SetMemoryToolEnabled(enabled bool) {
 	cb.memoryToolEnabled = enabled
+}
+
+// SetUserStore sets the user store for user directory context in prompts.
+func (cb *ContextBuilder) SetUserStore(store *UserStore) {
+	cb.userStore = store
 }
 
 // hasTool returns true if the named tool is registered in the tool registry.
@@ -221,7 +227,33 @@ When interacting with the user if something seems memorable, update the memory f
 }
 
 // ---------------------------------------------------------------------------
-// Section 8: Silent Reply
+// Section 8: User Management Guidance
+// ---------------------------------------------------------------------------
+
+func getUserManagementGuidance() string {
+	return `## User Management
+Messages from users arrive with a sender prefix:
+- [Name]: message — a registered user. Their profile is available in Current Session.
+- [channel:id]: message — an unregistered user. Naturally ask their name, then register with the user tool (action=create).
+- No prefix — WebSocket with no linked user, or system message.
+
+Use the user tool to manage user profiles:
+- list / get: Look up user information
+- create: Register a new user (name required, channel + channel_id optional)
+- update: Change a user's name
+- link: Associate a channel ID with an existing user (for cross-channel identity)
+- add_memo / remove_memo: Store or remove notes about a user (preferences, language, timezone, etc.)
+- delete: Remove a user
+
+Guidelines:
+- When the same person uses multiple channels, use link to associate their IDs.
+- Store user preferences and characteristics with add_memo, not in memory.
+- If a read_legacy action is available, it means a legacy USER.md file exists and should be migrated.
+- After migration is complete, use delete_legacy to remove the old USER.md file.`
+}
+
+// ---------------------------------------------------------------------------
+// Section 9: Silent Reply
 // ---------------------------------------------------------------------------
 
 func getSilentReplySection() string {
@@ -236,7 +268,7 @@ Rules:
 }
 
 // ---------------------------------------------------------------------------
-// Section 9: Heartbeat
+// Section 10: Heartbeat
 // ---------------------------------------------------------------------------
 
 func getHeartbeatSection() string {
@@ -247,14 +279,13 @@ If something needs attention, do NOT include "HEARTBEAT_OK"; reply with the aler
 }
 
 // ---------------------------------------------------------------------------
-// Bootstrap Files (SOUL.md, USER.md, etc.)
+// Bootstrap Files (SOUL.md, AGENT.md, etc.)
 // ---------------------------------------------------------------------------
 
 func (cb *ContextBuilder) LoadBootstrapFiles() string {
 	bootstrapFiles := []string{
 		"AGENT.md",
 		"SOUL.md",
-		"USER.md",
 		"IDENTITY.md",
 	}
 
@@ -355,19 +386,24 @@ func (cb *ContextBuilder) BuildSystemPrompt() string {
 	// 7. Memory Guidance
 	parts = append(parts, cb.getMemoryGuidance())
 
-	// 8. Bootstrap Files (SOUL.md, USER.md, etc.)
+	// 8. User Management Guidance (only when user tool is registered)
+	if cb.hasTool("user") {
+		parts = append(parts, getUserManagementGuidance())
+	}
+
+	// 9. Bootstrap Files (SOUL.md, etc.)
 	bootstrapContent := cb.LoadBootstrapFiles()
 	if bootstrapContent != "" {
 		parts = append(parts, bootstrapContent)
 	}
 
-	// 9. Skills (only when skills exist)
+	// 10. Skills (only when skills exist)
 	skillsSection := cb.buildSkillsSection()
 	if skillsSection != "" {
 		parts = append(parts, skillsSection)
 	}
 
-	// 10. MCP Servers (only when MCP is configured)
+	// 11. MCP Servers (only when MCP is configured)
 	if cb.mcpManager != nil {
 		mcpSummary := cb.mcpManager.BuildSummary()
 		if mcpSummary != "" {
@@ -380,22 +416,22 @@ Use the mcp tool to discover and call server tools.
 		}
 	}
 
-	// 11. Connected Channels
+	// 12. Connected Channels
 	channelsSection := cb.buildChannelsSection()
 	if channelsSection != "" {
 		parts = append(parts, channelsSection)
 	}
 
-	// 12. Memory Context (actual memory contents)
+	// 13. Memory Context (actual memory contents)
 	memoryContext := cb.memory.GetMemoryContext()
 	if memoryContext != "" {
 		parts = append(parts, "# Memory\n\n"+memoryContext)
 	}
 
-	// 13. Silent Reply Instructions
+	// 14. Silent Reply Instructions
 	parts = append(parts, getSilentReplySection())
 
-	// 14. Heartbeat
+	// 15. Heartbeat
 	parts = append(parts, getHeartbeatSection())
 
 	// Join with "---" separator
@@ -406,15 +442,25 @@ Use the mcp tool to discover and call server tools.
 // BuildMessages — constructs the full message array for the LLM
 // ---------------------------------------------------------------------------
 
-func (cb *ContextBuilder) BuildMessages(history []providers.Message, summary string, currentMessage string, media []string, channel, chatID, inputMode string) []providers.Message {
+func (cb *ContextBuilder) BuildMessages(history []providers.Message, summary string, currentMessage string, media []string, channel, chatID, inputMode string, resolvedUser *User) []providers.Message {
 	messages := []providers.Message{}
 
 	systemPrompt := cb.BuildSystemPrompt()
 
 	// Add Current Session info if provided
 	if channel != "" && chatID != "" {
-		systemPrompt += fmt.Sprintf("\n\n## Current Session\nChannel: %s\nChat ID: %s\nInput Mode: %s",
+		sessionInfo := fmt.Sprintf("\n\n## Current Session\nChannel: %s\nChat ID: %s\nInput Mode: %s",
 			channel, chatID, inputMode)
+		if resolvedUser != nil {
+			sessionInfo += fmt.Sprintf("\nSender: %s (ID: %s)", resolvedUser.Name, resolvedUser.ID)
+			if len(resolvedUser.Memo) > 0 {
+				sessionInfo += "\nUser Notes:"
+				for _, m := range resolvedUser.Memo {
+					sessionInfo += fmt.Sprintf("\n- %s", m)
+				}
+			}
+		}
+		systemPrompt += sessionInfo
 	}
 
 	// Add voice mode instructions when input is from voice or assistant

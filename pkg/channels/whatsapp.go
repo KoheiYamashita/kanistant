@@ -176,6 +176,7 @@ func (c *WhatsAppChannel) handleIncomingMessage(msg map[string]interface{}) {
 	}
 	if userName, ok := msg["from_name"].(string); ok {
 		metadata["user_name"] = userName
+		metadata["sender_name"] = userName
 	}
 
 	log.Printf("WhatsApp message from %s: %s...", senderID, utils.Truncate(content, 50))

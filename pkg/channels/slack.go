@@ -258,10 +258,11 @@ func (c *SlackChannel) handleMessageEvent(ev *slackevents.MessageEvent) {
 	}
 
 	metadata := map[string]string{
-		"message_ts": messageTS,
-		"channel_id": channelID,
-		"thread_ts":  threadTS,
-		"platform":   "slack",
+		"message_ts":  messageTS,
+		"channel_id":  channelID,
+		"thread_ts":   threadTS,
+		"platform":    "slack",
+		"sender_name": senderID,
 	}
 
 	logger.DebugCF("slack", "Received message", map[string]interface{}{
@@ -315,11 +316,12 @@ func (c *SlackChannel) handleAppMention(ev *slackevents.AppMentionEvent) {
 	}
 
 	metadata := map[string]string{
-		"message_ts": messageTS,
-		"channel_id": channelID,
-		"thread_ts":  threadTS,
-		"platform":   "slack",
-		"is_mention": "true",
+		"message_ts":  messageTS,
+		"channel_id":  channelID,
+		"thread_ts":   threadTS,
+		"platform":    "slack",
+		"is_mention":  "true",
+		"sender_name": senderID,
 	}
 
 	c.HandleMessage(senderID, chatID, content, nil, metadata)
@@ -352,10 +354,11 @@ func (c *SlackChannel) handleSlashCommand(event socketmode.Event) {
 	}
 
 	metadata := map[string]string{
-		"channel_id": channelID,
-		"platform":   "slack",
-		"is_command": "true",
-		"trigger_id": cmd.TriggerID,
+		"channel_id":  channelID,
+		"platform":    "slack",
+		"is_command":  "true",
+		"trigger_id":  cmd.TriggerID,
+		"sender_name": senderID,
 	}
 
 	logger.DebugCF("slack", "Slash command received", map[string]interface{}{

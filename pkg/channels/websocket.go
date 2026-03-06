@@ -349,6 +349,7 @@ func (c *WebSocketChannel) readPump(conn *websocket.Conn, clientID, chatID, clie
 		metadata := map[string]string{
 			"input_mode":  inputMode,
 			"client_type": clientType,
+			"sender_name": "",
 		}
 		c.HandleMessage(senderID, chatID, content, media, metadata)
 	}
