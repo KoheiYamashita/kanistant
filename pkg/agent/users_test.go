@@ -25,7 +25,7 @@ func TestNewUserStore_LoadExisting(t *testing.T) {
 		{ID: "u_abc", Name: "Alice", Channels: map[string][]string{}, Memo: []string{}},
 	}}
 	data, _ := json.MarshalIndent(f, "", "  ")
-	os.WriteFile(filepath.Join(tmpDir, "users.json"), data, 0644)
+	_ = os.WriteFile(filepath.Join(tmpDir, "users.json"), data, 0644)
 
 	store := NewUserStore(tmpDir)
 	users := store.List()
@@ -64,8 +64,8 @@ func TestCreate(t *testing.T) {
 
 func TestResolveByChannelID(t *testing.T) {
 	store := NewUserStore(t.TempDir())
-	store.Create("Alice", "discord", "111")
-	store.Create("Bob", "slack", "222")
+	_, _ = store.Create("Alice", "discord", "111")
+	_, _ = store.Create("Bob", "slack", "222")
 
 	// Found
 	u := store.ResolveByChannelID("discord", "111")
@@ -89,7 +89,7 @@ func TestResolveByChannelID(t *testing.T) {
 func TestResolveByChannelID_WebSocket(t *testing.T) {
 	store := NewUserStore(t.TempDir())
 	user, _ := store.Create("Alice", "", "")
-	store.Link(user.ID, "websocket", "ws1")
+	_ = store.Link(user.ID, "websocket", "ws1")
 
 	// WebSocket ignores senderID — any linked user is returned
 	u := store.ResolveByChannelID("websocket", "anything")
@@ -163,8 +163,8 @@ func TestAddMemo(t *testing.T) {
 func TestRemoveMemo(t *testing.T) {
 	store := NewUserStore(t.TempDir())
 	user, _ := store.Create("Alice", "", "")
-	store.AddMemo(user.ID, "first")
-	store.AddMemo(user.ID, "second")
+	_ = store.AddMemo(user.ID, "first")
+	_ = store.AddMemo(user.ID, "second")
 
 	if err := store.RemoveMemo(user.ID, 0); err != nil {
 		t.Fatalf("RemoveMemo failed: %v", err)
@@ -264,7 +264,7 @@ func TestNeedsMigration(t *testing.T) {
 
 	// USER.md exists, no users.json → migration needed
 	tmpDir := t.TempDir()
-	os.WriteFile(filepath.Join(tmpDir, "USER.md"), []byte("legacy data"), 0644)
+	_ = os.WriteFile(filepath.Join(tmpDir, "USER.md"), []byte("legacy data"), 0644)
 	store = NewUserStore(tmpDir)
 	if !store.NeedsMigration() {
 		t.Error("should need migration when USER.md exists without users.json")
@@ -272,8 +272,8 @@ func TestNeedsMigration(t *testing.T) {
 
 	// Both exist → no migration needed
 	tmpDir = t.TempDir()
-	os.WriteFile(filepath.Join(tmpDir, "USER.md"), []byte("legacy"), 0644)
-	os.WriteFile(filepath.Join(tmpDir, "users.json"), []byte(`{"users":[]}`), 0644)
+	_ = os.WriteFile(filepath.Join(tmpDir, "USER.md"), []byte("legacy"), 0644)
+	_ = os.WriteFile(filepath.Join(tmpDir, "users.json"), []byte(`{"users":[]}`), 0644)
 	store = NewUserStore(tmpDir)
 	if store.NeedsMigration() {
 		t.Error("should not need migration when both files exist")

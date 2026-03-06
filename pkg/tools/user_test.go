@@ -9,9 +9,8 @@ import (
 
 // mockUserDirectory implements UserDirectory for testing.
 type mockUserDirectory struct {
-	users         []*UserInfo
-	nextID        int
-	legacyContent string
+	users  []*UserInfo
+	nextID int
 }
 
 func newMockUserDirectory() *mockUserDirectory {
@@ -188,8 +187,8 @@ func TestUserTool_Create_MissingName(t *testing.T) {
 func TestUserTool_List(t *testing.T) {
 	dir := newMockUserDirectory()
 	tool := NewUserTool(dir, false)
-	dir.Create("Alice", "", "")
-	dir.Create("Bob", "", "")
+	_, _ = dir.Create("Alice", "", "")
+	_, _ = dir.Create("Bob", "", "")
 
 	result := tool.Execute(context.Background(), map[string]interface{}{
 		"action": "list",
@@ -408,8 +407,8 @@ func TestUserTool_RemoveMemo(t *testing.T) {
 	dir := newMockUserDirectory()
 	tool := NewUserTool(dir, false)
 	u, _ := dir.Create("Alice", "", "")
-	dir.AddMemo(u.ID, "first")
-	dir.AddMemo(u.ID, "second")
+	_ = dir.AddMemo(u.ID, "first")
+	_ = dir.AddMemo(u.ID, "second")
 
 	result := tool.Execute(context.Background(), map[string]interface{}{
 		"action":     "remove_memo",
@@ -428,7 +427,7 @@ func TestUserTool_RemoveMemo_MissingIndex(t *testing.T) {
 	dir := newMockUserDirectory()
 	tool := NewUserTool(dir, false)
 	u, _ := dir.Create("Alice", "", "")
-	dir.AddMemo(u.ID, "test")
+	_ = dir.AddMemo(u.ID, "test")
 
 	result := tool.Execute(context.Background(), map[string]interface{}{
 		"action":  "remove_memo",
@@ -453,7 +452,7 @@ func TestUserTool_ReadLegacy(t *testing.T) {
 func TestUserTool_DeleteLegacy(t *testing.T) {
 	tmpDir := t.TempDir()
 	legacyPath := tmpDir + "/USER.md"
-	os.WriteFile(legacyPath, []byte("legacy data"), 0644)
+	_ = os.WriteFile(legacyPath, []byte("legacy data"), 0644)
 
 	dir := &mockUserDirectoryWithPath{
 		mockUserDirectory: newMockUserDirectory(),
