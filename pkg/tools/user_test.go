@@ -3,6 +3,7 @@ package tools
 import (
 	"context"
 	"fmt"
+	"os"
 	"testing"
 )
 
@@ -107,6 +108,36 @@ func (m *mockUserDirectory) RemoveMemo(userID string, index int) error {
 
 func (m *mockUserDirectory) LegacyFilePath() string {
 	return ""
+}
+
+// mockUserDirectoryWithPath extends mockUserDirectory with a custom legacy path.
+type mockUserDirectoryWithPath struct {
+	*mockUserDirectory
+	legacyPath string
+}
+
+func (m *mockUserDirectoryWithPath) LegacyFilePath() string {
+	return m.legacyPath
+}
+
+// mockExclusiveDirectory implements websocket exclusivity like the real UserStore.
+type mockExclusiveDirectory struct {
+	*mockUserDirectory
+}
+
+func newMockExclusiveDirectory() *mockExclusiveDirectory {
+	return &mockExclusiveDirectory{mockUserDirectory: newMockUserDirectory()}
+}
+
+func (m *mockExclusiveDirectory) Link(userID, channel, channelID string) error {
+	if channel == "websocket" {
+		for _, u := range m.users {
+			if u.ID != userID && len(u.Channels["websocket"]) > 0 {
+				return fmt.Errorf("websocket is already linked to user %s (%s)", u.Name, u.ID)
+			}
+		}
+	}
+	return m.mockUserDirectory.Link(userID, channel, channelID)
 }
 
 func TestUserTool_NameAndDescription(t *testing.T) {
@@ -416,6 +447,80 @@ func TestUserTool_ReadLegacy(t *testing.T) {
 	})
 	if !result.IsError {
 		t.Error("expected error when no legacy file")
+	}
+}
+
+func TestUserTool_DeleteLegacy(t *testing.T) {
+	tmpDir := t.TempDir()
+	legacyPath := tmpDir + "/USER.md"
+	os.WriteFile(legacyPath, []byte("legacy data"), 0644)
+
+	dir := &mockUserDirectoryWithPath{
+		mockUserDirectory: newMockUserDirectory(),
+		legacyPath:        legacyPath,
+	}
+	tool := NewUserTool(dir, true)
+
+	result := tool.Execute(context.Background(), map[string]interface{}{
+		"action": "delete_legacy",
+	})
+	if result.IsError {
+		t.Fatalf("unexpected error: %s", result.ForLLM)
+	}
+
+	// File should be deleted
+	if _, err := os.Stat(legacyPath); !os.IsNotExist(err) {
+		t.Error("expected USER.md to be deleted")
+	}
+
+	// Second call should fail (hasLegacyFile is now false)
+	result = tool.Execute(context.Background(), map[string]interface{}{
+		"action": "delete_legacy",
+	})
+	if !result.IsError {
+		t.Error("expected error on second delete_legacy call")
+	}
+}
+
+func TestUserTool_DeleteLegacy_NoFile(t *testing.T) {
+	tool := NewUserTool(newMockUserDirectory(), false)
+
+	result := tool.Execute(context.Background(), map[string]interface{}{
+		"action": "delete_legacy",
+	})
+	if !result.IsError {
+		t.Error("expected error when hasLegacyFile is false")
+	}
+}
+
+func TestUserTool_Link_WebSocketExclusive(t *testing.T) {
+	dir := newMockExclusiveDirectory()
+	tool := NewUserTool(dir, false)
+
+	alice, _ := dir.Create("Alice", "websocket", "ws1")
+
+	bob, _ := dir.Create("Bob", "", "")
+
+	// Link Bob to websocket should fail
+	result := tool.Execute(context.Background(), map[string]interface{}{
+		"action":     "link",
+		"user_id":    bob.ID,
+		"channel":    "websocket",
+		"channel_id": "ws2",
+	})
+	if !result.IsError {
+		t.Error("expected error when linking websocket to second user")
+	}
+
+	// Non-websocket link should succeed
+	result = tool.Execute(context.Background(), map[string]interface{}{
+		"action":     "link",
+		"user_id":    alice.ID,
+		"channel":    "discord",
+		"channel_id": "12345",
+	})
+	if result.IsError {
+		t.Fatalf("non-websocket link should succeed: %s", result.ForLLM)
 	}
 }
 

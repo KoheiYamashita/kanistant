@@ -165,6 +165,18 @@ func (s *UserStore) Create(name, channel, channelID string) (*User, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	// WebSocket is exclusive: only one user may be linked at a time.
+	// The channelID is meaningless for websocket (resolution ignores it),
+	// so normalise to a fixed marker to prevent session-specific IDs leaking in.
+	if channel == "websocket" {
+		channelID = "linked"
+		for _, other := range s.users {
+			if len(other.Channels["websocket"]) > 0 {
+				return nil, fmt.Errorf("websocket is already linked to user %s (%s)", other.Name, other.ID)
+			}
+		}
+	}
+
 	user := &User{
 		ID:       generateUserID(),
 		Name:     name,
@@ -207,6 +219,18 @@ func (s *UserStore) Link(userID, channel, channelID string) error {
 	u := s.findByID(userID)
 	if u == nil {
 		return fmt.Errorf("%w: %s", errUserNotFound, userID)
+	}
+	// WebSocket is exclusive: only one user may be linked at a time.
+	// Normalise channelID to a fixed marker (resolution ignores it).
+	if channel == "websocket" {
+		channelID = "linked"
+		for _, other := range s.users {
+			if other.ID != userID && len(other.Channels["websocket"]) > 0 {
+				return fmt.Errorf("websocket is already linked to user %s (%s)", other.Name, other.ID)
+			}
+		}
+		u.Channels["websocket"] = []string{channelID}
+		return s.save()
 	}
 	for _, id := range u.Channels[channel] {
 		if id == channelID {

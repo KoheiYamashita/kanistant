@@ -248,7 +248,8 @@ Use the user tool to manage user profiles:
 Guidelines:
 - When the same person uses multiple channels, use link to associate their IDs.
 - Store user preferences and characteristics with add_memo, not in memory.
-- If a read_legacy action is available, it means a legacy USER.md file exists and should be migrated.`
+- If a read_legacy action is available, it means a legacy USER.md file exists and should be migrated.
+- After migration is complete, use delete_legacy to remove the old USER.md file.`
 }
 
 // ---------------------------------------------------------------------------

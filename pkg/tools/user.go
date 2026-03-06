@@ -58,7 +58,7 @@ func (t *UserTool) Name() string {
 func (t *UserTool) Description() string {
 	desc := "Manage user directory. Actions: list, get, create, update, delete, link, add_memo, remove_memo"
 	if t.hasLegacyFile {
-		desc += ", read_legacy"
+		desc += ", read_legacy, delete_legacy"
 	}
 	return desc
 }
@@ -66,7 +66,7 @@ func (t *UserTool) Description() string {
 func (t *UserTool) Parameters() map[string]interface{} {
 	actions := []string{"list", "get", "create", "update", "delete", "link", "add_memo", "remove_memo"}
 	if t.hasLegacyFile {
-		actions = append(actions, "read_legacy")
+		actions = append(actions, "read_legacy", "delete_legacy")
 	}
 
 	return map[string]interface{}{
@@ -131,6 +131,8 @@ func (t *UserTool) Execute(ctx context.Context, args map[string]interface{}) *To
 		return t.execRemoveMemo(args)
 	case "read_legacy":
 		return t.execReadLegacy()
+	case "delete_legacy":
+		return t.execDeleteLegacy()
 	default:
 		return ErrorResult(fmt.Sprintf("unknown action: %s", action))
 	}
@@ -246,6 +248,17 @@ func (t *UserTool) execRemoveMemo(args map[string]interface{}) *ToolResult {
 	return SilentResult("Memo removed successfully.")
 }
 
+func (t *UserTool) execDeleteLegacy() *ToolResult {
+	if !t.hasLegacyFile {
+		return ErrorResult("no legacy USER.md file found")
+	}
+	if err := os.Remove(t.dir.LegacyFilePath()); err != nil {
+		return ErrorResult(fmt.Sprintf("failed to delete USER.md: %v", err))
+	}
+	t.hasLegacyFile = false
+	return SilentResult("USER.md has been deleted.")
+}
+
 func (t *UserTool) execReadLegacy() *ToolResult {
 	if !t.hasLegacyFile {
 		return ErrorResult("no legacy USER.md file found")
@@ -264,5 +277,6 @@ To migrate this data to the new user directory:
 2. Use 'create' to create a user with their name
 3. Use 'add_memo' to record relevant preferences (language, timezone, etc.)
 4. Use 'link' to associate their channel IDs (ask the user for their IDs on each channel)
-5. Once migration is complete, inform the user that USER.md is no longer needed`, string(data)))
+5. Once migration is complete, inform the user that USER.md is no longer needed
+6. Use 'delete_legacy' to delete the old USER.md file`, string(data)))
 }

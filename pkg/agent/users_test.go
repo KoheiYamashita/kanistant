@@ -200,6 +200,61 @@ func TestDelete(t *testing.T) {
 	}
 }
 
+func TestLink_WebSocketExclusive(t *testing.T) {
+	store := NewUserStore(t.TempDir())
+	alice, _ := store.Create("Alice", "", "")
+	bob, _ := store.Create("Bob", "", "")
+
+	// Link Alice to websocket — channelID should be normalised
+	if err := store.Link(alice.ID, "websocket", "session-xyz"); err != nil {
+		t.Fatalf("first websocket link should succeed: %v", err)
+	}
+	u := store.Get(alice.ID)
+	if ids := u.Channels["websocket"]; len(ids) != 1 || ids[0] != "linked" {
+		t.Errorf("websocket channelID should be normalised to 'linked', got %v", ids)
+	}
+
+	// Link Bob to websocket should fail
+	if err := store.Link(bob.ID, "websocket", "ws2"); err == nil {
+		t.Error("expected error when linking websocket to second user")
+	}
+
+	// Re-linking Alice should succeed (replace, not accumulate)
+	if err := store.Link(alice.ID, "websocket", "different-session"); err != nil {
+		t.Fatalf("re-linking websocket should succeed: %v", err)
+	}
+	u = store.Get(alice.ID)
+	if ids := u.Channels["websocket"]; len(ids) != 1 || ids[0] != "linked" {
+		t.Errorf("websocket should still have exactly one 'linked' entry, got %v", ids)
+	}
+}
+
+func TestCreate_WebSocketExclusive(t *testing.T) {
+	store := NewUserStore(t.TempDir())
+	alice, _ := store.Create("Alice", "websocket", "session-abc-123")
+
+	// channelID should be normalised to "linked"
+	u := store.Get(alice.ID)
+	if ids := u.Channels["websocket"]; len(ids) != 1 || ids[0] != "linked" {
+		t.Errorf("websocket channelID should be normalised to 'linked', got %v", ids)
+	}
+
+	// Creating another user with websocket should fail
+	_, err := store.Create("Bob", "websocket", "ws2")
+	if err == nil {
+		t.Error("expected error when creating user with websocket already linked")
+	}
+
+	// Creating with non-websocket channel should succeed
+	bob, err := store.Create("Bob", "discord", "12345")
+	if err != nil {
+		t.Fatalf("non-websocket create should succeed: %v", err)
+	}
+	if bob.Name != "Bob" {
+		t.Errorf("expected name Bob, got %q", bob.Name)
+	}
+}
+
 func TestNeedsMigration(t *testing.T) {
 	// No USER.md, no users.json → no migration needed
 	store := NewUserStore(t.TempDir())
