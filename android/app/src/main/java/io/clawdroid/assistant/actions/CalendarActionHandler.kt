@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
-import android.content.Intent
 import android.provider.CalendarContract
 import io.clawdroid.core.data.remote.dto.ToolRequest
 import io.clawdroid.core.data.remote.dto.ToolResponse
@@ -21,7 +20,7 @@ class CalendarActionHandler : ActionHandler {
     override fun requiredPermissions(action: String): List<PermissionRequirement> = when (action) {
         "query_events", "list_calendars" ->
             listOf(PermissionRequirement.Runtime(Manifest.permission.READ_CALENDAR, "Calendar read access"))
-        "update_event", "delete_event", "add_reminder" ->
+        "create_event", "update_event", "delete_event", "add_reminder" ->
             listOf(PermissionRequirement.Runtime(Manifest.permission.WRITE_CALENDAR, "Calendar write access"))
         else -> emptyList()
     }
@@ -54,26 +53,62 @@ class CalendarActionHandler : ActionHandler {
             return ToolResponse(request.requestId, false, error = "Invalid start_time format: ${e.message}")
         }
 
-        val intent = Intent(Intent.ACTION_INSERT).apply {
-            data = CalendarContract.Events.CONTENT_URI
-            putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, startMillis)
-            putExtra(CalendarContract.Events.TITLE, title)
-            request.stringParam("end_time")?.let {
-                try { fmt.parse(it)?.time } catch (_: Exception) { null }
-            }?.let { putExtra(CalendarContract.EXTRA_EVENT_END_TIME, it) }
+        val endMillis = request.stringParam("end_time")?.let {
+            try { fmt.parse(it)?.time } catch (_: Exception) { null }
+        } ?: (startMillis + 3600_000L) // default 1 hour
+
+        val calendarId = request.stringParam("calendar_id")?.toLongOrNull()
+            ?: getDefaultCalendarId(context)
+            ?: return ToolResponse(request.requestId, false, error = "No calendar found. Please add a Google account first.")
+
+        val values = ContentValues().apply {
+            put(CalendarContract.Events.CALENDAR_ID, calendarId)
+            put(CalendarContract.Events.TITLE, title)
+            put(CalendarContract.Events.DTSTART, startMillis)
+            put(CalendarContract.Events.DTEND, endMillis)
+            put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().id)
             request.stringParam("description")?.let {
-                putExtra(CalendarContract.Events.DESCRIPTION, it)
+                put(CalendarContract.Events.DESCRIPTION, it)
             }
             request.stringParam("location")?.let {
-                putExtra(CalendarContract.Events.EVENT_LOCATION, it)
+                put(CalendarContract.Events.EVENT_LOCATION, it)
             }
             request.boolParam("all_day")?.let {
-                putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, it)
+                if (it) put(CalendarContract.Events.ALL_DAY, 1)
             }
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 
-        return launchActivity(request, context, intent, "Calendar event creation opened: $title")
+        return try {
+            val uri = context.contentResolver.insert(CalendarContract.Events.CONTENT_URI, values)
+            val eventId = uri?.lastPathSegment
+            ToolResponse(request.requestId, true, result = "Event created: $title (ID: $eventId)")
+        } catch (e: SecurityException) {
+            ToolResponse(request.requestId, false, error = "Calendar permission not granted. Please grant WRITE_CALENDAR permission.")
+        } catch (e: Exception) {
+            ToolResponse(request.requestId, false, error = "Failed to create event: ${e.message}")
+        }
+    }
+
+    private fun getDefaultCalendarId(context: Context): Long? {
+        val projection = arrayOf(CalendarContract.Calendars._ID)
+        val selection = "${CalendarContract.Calendars.IS_PRIMARY} = 1"
+        val cursor = context.contentResolver.query(
+            CalendarContract.Calendars.CONTENT_URI, projection, selection, null, null
+        )
+        cursor?.use {
+            if (it.moveToFirst()) return it.getLong(0)
+        }
+        // Fallback: first writable calendar
+        val fallbackCursor = context.contentResolver.query(
+            CalendarContract.Calendars.CONTENT_URI,
+            arrayOf(CalendarContract.Calendars._ID),
+            "${CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL} >= ${CalendarContract.Calendars.CAL_ACCESS_CONTRIBUTOR}",
+            null, null
+        )
+        fallbackCursor?.use {
+            if (it.moveToFirst()) return it.getLong(0)
+        }
+        return null
     }
 
     private fun handleQueryEvents(request: ToolRequest, context: Context): ToolResponse {
