@@ -2,14 +2,40 @@ package io.clawdroid.assistant.actions
 
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.hardware.camera2.CameraManager
 import android.media.AudioManager
+import android.net.Uri
 import android.provider.Settings
 import io.clawdroid.core.data.remote.dto.ToolRequest
 import io.clawdroid.core.data.remote.dto.ToolResponse
 
 class DeviceControlActionHandler : ActionHandler {
     override val supportedActions = setOf("flashlight", "set_volume", "set_ringer_mode", "set_dnd", "set_brightness")
+
+    override fun requiredPermissions(action: String): List<PermissionRequirement> = when (action) {
+        "set_dnd", "set_ringer_mode" -> listOf(
+            PermissionRequirement.Special(
+                check = {
+                    (it.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+                        .isNotificationPolicyAccessGranted
+                },
+                settingsIntent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS),
+                description = "Do Not Disturb access"
+            )
+        )
+        "set_brightness" -> listOf(
+            PermissionRequirement.Special(
+                check = { Settings.System.canWrite(it) },
+                settingsIntent = Intent(
+                    Settings.ACTION_MANAGE_WRITE_SETTINGS,
+                    Uri.parse("package:io.clawdroid")
+                ),
+                description = "Modify system settings"
+            )
+        )
+        else -> emptyList()
+    }
 
     override suspend fun handle(request: ToolRequest, context: Context): ToolResponse {
         return when (request.action) {

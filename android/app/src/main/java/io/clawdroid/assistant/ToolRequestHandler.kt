@@ -52,6 +52,8 @@ class ToolRequestHandler(
         .flatMap { handler -> handler.supportedActions.map { it to handler } }
         .toMap()
 
+    private val permissionRequester = PermissionRequester(context)
+
     suspend fun handle(request: ToolRequest): ToolResponse {
         return try {
             when (request.action) {
@@ -75,6 +77,7 @@ class ToolRequestHandler(
                             success = false,
                             error = "Unknown action: ${request.action}"
                         )
+                    ensurePermissions(request, handler)?.let { return it }
                     handler.handle(request, context)
                 }
             }
@@ -86,6 +89,42 @@ class ToolRequestHandler(
                 error = "Error: ${e.message}"
             )
         }
+    }
+
+    private suspend fun ensurePermissions(
+        request: ToolRequest,
+        handler: ActionHandler
+    ): ToolResponse? {
+        val requirements = handler.requiredPermissions(request.action)
+        if (requirements.isEmpty()) return null
+
+        for (req in requirements) {
+            when (req) {
+                is PermissionRequirement.Runtime -> {
+                    val granted = permissionRequester.request(req.permission)
+                    if (!granted) {
+                        return ToolResponse(
+                            requestId = request.requestId,
+                            success = false,
+                            error = "Permission denied: ${req.description}. Please grant the permission and try again."
+                        )
+                    }
+                }
+                is PermissionRequirement.Special -> {
+                    if (!req.check(context)) {
+                        val intent = req.settingsIntent
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        context.startActivity(intent)
+                        return ToolResponse(
+                            requestId = request.requestId,
+                            success = false,
+                            error = "${req.description} is not granted. Settings screen has been opened. Please grant the permission and try again."
+                        )
+                    }
+                }
+            }
+        }
+        return null
     }
 
     private fun requireAccessibility(request: ToolRequest): ToolResponse? {

@@ -13,6 +13,7 @@ import kotlinx.serialization.json.jsonPrimitive
 interface ActionHandler {
     val supportedActions: Set<String>
     suspend fun handle(request: ToolRequest, context: Context): ToolResponse
+    fun requiredPermissions(action: String): List<PermissionRequirement> = emptyList()
 }
 
 fun ToolRequest.stringParam(name: String): String? =

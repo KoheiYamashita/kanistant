@@ -1,5 +1,6 @@
 package io.clawdroid.assistant.actions
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -12,6 +13,12 @@ import java.util.Locale
 
 class NavigationActionHandler : ActionHandler {
     override val supportedActions = setOf("navigate", "search_nearby", "show_map", "get_current_location")
+
+    override fun requiredPermissions(action: String): List<PermissionRequirement> = when (action) {
+        "get_current_location" ->
+            listOf(PermissionRequirement.Runtime(Manifest.permission.ACCESS_FINE_LOCATION, "Location access"))
+        else -> emptyList()
+    }
 
     override suspend fun handle(request: ToolRequest, context: Context): ToolResponse {
         return when (request.action) {

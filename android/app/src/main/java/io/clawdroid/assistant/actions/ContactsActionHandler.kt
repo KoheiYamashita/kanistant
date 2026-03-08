@@ -1,5 +1,6 @@
 package io.clawdroid.assistant.actions
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.provider.ContactsContract
@@ -8,6 +9,12 @@ import io.clawdroid.core.data.remote.dto.ToolResponse
 
 class ContactsActionHandler : ActionHandler {
     override val supportedActions = setOf("search_contacts", "get_contact_detail", "add_contact")
+
+    override fun requiredPermissions(action: String): List<PermissionRequirement> = when (action) {
+        "search_contacts", "get_contact_detail" ->
+            listOf(PermissionRequirement.Runtime(Manifest.permission.READ_CONTACTS, "Contacts read access"))
+        else -> emptyList()
+    }
 
     override suspend fun handle(request: ToolRequest, context: Context): ToolResponse {
         return when (request.action) {

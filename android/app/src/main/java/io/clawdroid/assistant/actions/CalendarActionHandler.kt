@@ -1,5 +1,6 @@
 package io.clawdroid.assistant.actions
 
+import android.Manifest
 import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
@@ -16,6 +17,14 @@ class CalendarActionHandler : ActionHandler {
         "create_event", "query_events", "update_event",
         "delete_event", "list_calendars", "add_reminder"
     )
+
+    override fun requiredPermissions(action: String): List<PermissionRequirement> = when (action) {
+        "query_events", "list_calendars" ->
+            listOf(PermissionRequirement.Runtime(Manifest.permission.READ_CALENDAR, "Calendar read access"))
+        "update_event", "delete_event", "add_reminder" ->
+            listOf(PermissionRequirement.Runtime(Manifest.permission.WRITE_CALENDAR, "Calendar write access"))
+        else -> emptyList()
+    }
 
     private fun isoFormat(): SimpleDateFormat =
         SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).apply {
