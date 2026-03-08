@@ -154,6 +154,7 @@ fun ConfigSectionDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     var lastGroup: String? = null
+                    var sectionEnabled = true  // top-level "Enabled" toggle
                     var groupEnabled = true
                     detail.fields.forEach { field ->
                         val indent = (field.depth * 16).dp
@@ -169,10 +170,16 @@ fun ConfigSectionDetailScreen(
                                 Text(
                                     text = field.group,
                                     style = MaterialTheme.typography.titleSmall,
-                                    color = NeonCyan,
+                                    color = if (sectionEnabled) NeonCyan else NeonCyan.copy(alpha = 0.4f),
                                     modifier = Modifier.padding(start = indent, top = 8.dp),
                                 )
                             }
+                        }
+                        // Track section-level toggle (depth 0, no group)
+                        val isSectionToggle = field.key.endsWith(".enabled") &&
+                            field.type == "bool" && field.group.isEmpty()
+                        if (isSectionToggle) {
+                            sectionEnabled = field.value.toBooleanStrictOrNull() == true
                         }
                         // Track category toggle: first "enabled" field in a group
                         val isCategoryToggle = field.key.endsWith(".enabled") &&
@@ -180,11 +187,19 @@ fun ConfigSectionDetailScreen(
                         if (isCategoryToggle) {
                             groupEnabled = field.value.toBooleanStrictOrNull() == true
                         }
-                        val fieldEnabled = isCategoryToggle || groupEnabled
+                        val fieldEnabled = when {
+                            isSectionToggle -> true  // section toggle itself is always enabled
+                            !sectionEnabled -> false  // section off → all children disabled
+                            isCategoryToggle -> true  // category toggle enabled when section is on
+                            else -> groupEnabled  // actions follow their category
+                        }
                         ConfigField(
                             field = field,
                             onValueChanged = { newValue ->
                                 viewModel.onFieldValueChanged(field.key, newValue)
+                                if (isSectionToggle) {
+                                    sectionEnabled = newValue.toBooleanStrictOrNull() == true
+                                }
                                 if (isCategoryToggle) {
                                     groupEnabled = newValue.toBooleanStrictOrNull() == true
                                 }
