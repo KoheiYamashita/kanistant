@@ -22,7 +22,7 @@ graph TB
 
         subgraph backend["Go Backend (embedded)"]
             Agent["Agent Loop"]
-            Tools["Tool Loop<br/>(16+ tools)"]
+            Tools["Tool Loop<br/>(40+ tools)"]
             LLM["LLM"]
             Services["MCP / Cron /<br/>Skills / Memory"]
             Channels["Channels<br/>(Telegram, Discord, Slack, LINE etc.)"]
@@ -186,6 +186,23 @@ All settings can be overridden by environment variables with the `CLAWDROID_` pr
 | `android.enabled` | `true` | `CLAWDROID_TOOLS_ANDROID_ENABLED` | Android device automation |
 | `memory.enabled` | `true` | `CLAWDROID_TOOLS_MEMORY_ENABLED` | Long-term memory and daily notes |
 
+#### Android Action Categories (`tools.android`)
+
+Each category can be toggled with `tools.android.<category>.enabled`. Individual actions within a category can also be controlled with `tools.android.<category>.actions.<action>`.
+
+| Category Key | Default | Description |
+|-------------|---------|-------------|
+| `alarm.enabled` | `true` | Alarm and timer actions |
+| `calendar.enabled` | `true` | Calendar event actions |
+| `contacts.enabled` | `true` | Contact actions |
+| `communication.enabled` | `true` | Phone, SMS, email actions |
+| `media.enabled` | `true` | Media playback control |
+| `navigation.enabled` | `true` | Maps and navigation actions |
+| `device_control.enabled` | `true` | Device hardware control |
+| `settings.enabled` | `true` | System settings actions |
+| `web.enabled` | `true` | In-app browser and web search |
+| `clipboard.enabled` | `true` | Clipboard operations |
+
 #### Web Search (`tools.web`)
 
 | Key | Default | Env | Description |
@@ -331,7 +348,7 @@ Use `--debug` / `-d` with `gateway` or `agent` for verbose logging.
 
 ## Tools
 
-ClawDroid provides 16+ built-in tools that the AI agent can use autonomously.
+ClawDroid provides 40+ built-in tools that the AI agent can use autonomously.
 
 ### File Operations
 
@@ -364,6 +381,23 @@ File operations respect `restrict_to_workspace` when enabled.
 
 UI automation actions (`screenshot`, `tap`, `swipe`, etc.) are only available from the assistant overlay, not the main chat UI.
 
+#### Category-based Actions
+
+Additional actions are organized into categories, each of which can be enabled/disabled in the configuration.
+
+| Category | Actions | Description |
+|----------|---------|-------------|
+| **Alarm** | `set_alarm`, `set_timer`, `dismiss_alarm`, `show_alarms` | Alarm and timer management |
+| **Calendar** | `create_event`, `query_events`, `update_event`, `delete_event`, `list_calendars`, `add_reminder` | Calendar event management |
+| **Contacts** | `search_contacts`, `get_contact_detail`, `add_contact` | Contact lookup and management |
+| **Communication** | `dial`, `compose_sms`, `compose_email` | Phone, SMS, and email |
+| **Media** | `media_play_pause`, `media_next`, `media_previous`, `play_music_search` | Media playback control |
+| **Navigation** | `navigate`, `search_nearby`, `show_map`, `get_current_location` | Maps and navigation |
+| **Device Control** | `flashlight`, `set_volume`, `set_ringer_mode`, `set_dnd`, `set_brightness` | Device hardware control |
+| **Settings** | `open_settings` | Open system settings |
+| **Web** | `open_url`, `web_search` | In-app browser and web search |
+| **Clipboard** | `clipboard_copy`, `clipboard_read` | Clipboard operations |
+
 ### Web
 
 | Tool | Description |
@@ -381,6 +415,7 @@ UI automation actions (`screenshot`, `tap`, `swipe`, etc.) are only available fr
 | `memory` | Long-term memory and daily notes |
 | `message` | Cross-channel messaging |
 | `skill` | List and read skills |
+| `user` | User directory management (multi-user profiles) |
 | `exec` | Shell command execution (disabled by default) |
 | `exit` | End assistant/voice session |
 
@@ -418,7 +453,7 @@ Supports both **stdio** (local process) and **HTTP/Streamable** (remote) transpo
 
 - **Chat UI** - Full chat interface built with Jetpack Compose
 - **Floating Assistant Overlay** - Always-accessible pill bar overlay (`SYSTEM_ALERT_WINDOW`)
-- **Voice Mode** - Continuous voice conversation loop (listen -> send -> think -> speak)
+- **Voice Mode** - Continuous voice conversation loop (listen -> send -> think -> speak) with pause/resume listening support
 - **Replace Google Assistant** - Registered as `android.intent.action.ASSIST`; long-press home to activate
 - **Device Automation** - AccessibilityService-based tap, swipe, text input, screenshot capture
 - **Camera Capture** - Take photos during voice mode for visual context

@@ -45,6 +45,7 @@ Android アプリ ↔ Go バックエンド: WebSocket (`ws://127.0.0.1:18793`)
 設定ファイル: `~/.clawdroid/config.json`
 環境変数: `CLAWDROID_*` プレフィックスで上書き可能（例: `CLAWDROID_LLM_API_KEY`）
 バージョン管理: `/VERSION` ファイルにバージョン文字列を格納
+Android ツール: `tools.android.<category>.enabled` でカテゴリ単位の有効/無効切り替えが可能（10 カテゴリ: alarm, calendar, contacts, communication, media, navigation, device_control, settings, web, clipboard）
 
 ## GitHub テンプレート・CI
 
