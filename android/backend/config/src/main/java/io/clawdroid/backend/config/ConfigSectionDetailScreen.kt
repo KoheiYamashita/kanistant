@@ -154,10 +154,12 @@ fun ConfigSectionDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     var lastGroup: String? = null
+                    var groupEnabled = true
                     detail.fields.forEach { field ->
                         val indent = (field.depth * 16).dp
                         if (field.group != lastGroup) {
                             lastGroup = field.group
+                            groupEnabled = true
                             if (field.group.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 HorizontalDivider(
@@ -172,11 +174,24 @@ fun ConfigSectionDetailScreen(
                                 )
                             }
                         }
+                        // Track category toggle: first "enabled" field in a group
+                        val isCategoryToggle = field.key.endsWith(".enabled") &&
+                            field.type == "bool" && field.group.isNotEmpty()
+                        if (isCategoryToggle) {
+                            groupEnabled = field.value.toBooleanStrictOrNull() == true
+                        }
+                        val fieldEnabled = isCategoryToggle || groupEnabled
                         ConfigField(
                             field = field,
-                            onValueChanged = { viewModel.onFieldValueChanged(field.key, it) },
+                            onValueChanged = { newValue ->
+                                viewModel.onFieldValueChanged(field.key, newValue)
+                                if (isCategoryToggle) {
+                                    groupEnabled = newValue.toBooleanStrictOrNull() == true
+                                }
+                            },
                             snackbarHostState = snackbarHostState,
                             modifier = Modifier.padding(start = indent),
+                            enabled = fieldEnabled,
                         )
                     }
                 }
@@ -200,10 +215,11 @@ private fun ConfigField(
     onValueChanged: (String) -> Unit,
     snackbarHostState: SnackbarHostState? = null,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
         when (field.type) {
-            "bool" -> BoolField(field, onValueChanged)
+            "bool" -> BoolField(field, onValueChanged, enabled)
             "int" -> NumberField(field, onValueChanged, KeyboardType.Number)
             "float" -> NumberField(field, onValueChanged, KeyboardType.Decimal)
             "[]string" -> StringArrayField(field, onValueChanged)
@@ -241,7 +257,7 @@ private fun StringField(field: FieldState, onValueChanged: (String) -> Unit) {
 }
 
 @Composable
-private fun BoolField(field: FieldState, onValueChanged: (String) -> Unit) {
+private fun BoolField(field: FieldState, onValueChanged: (String) -> Unit, enabled: Boolean = true) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -252,11 +268,12 @@ private fun BoolField(field: FieldState, onValueChanged: (String) -> Unit) {
         Text(
             field.label,
             style = MaterialTheme.typography.bodyLarge,
-            color = TextPrimary,
+            color = if (enabled) TextPrimary else TextSecondary.copy(alpha = 0.5f),
         )
         Switch(
             checked = field.value.toBooleanStrictOrNull() == true,
             onCheckedChange = { onValueChanged(it.toString()) },
+            enabled = enabled,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = NeonCyan,
                 checkedTrackColor = NeonCyan.copy(alpha = 0.3f),

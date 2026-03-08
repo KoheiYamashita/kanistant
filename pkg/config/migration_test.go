@@ -97,26 +97,26 @@ func TestMigrateConfig_FromV2ToV3(t *testing.T) {
 		t.Errorf("Version = %d, want %d", cfg.Version, ConfigVersion)
 	}
 	// Categories
-	if !cfg.Tools.Android.Categories.Alarm {
+	if !cfg.Tools.Android.Alarm.Enabled {
 		t.Error("Alarm category should be true after v2->v3 migration")
 	}
-	if !cfg.Tools.Android.Categories.Calendar {
+	if !cfg.Tools.Android.Calendar.Enabled {
 		t.Error("Calendar category should be true after v2->v3 migration")
 	}
-	if cfg.Tools.Android.Categories.Contacts {
+	if cfg.Tools.Android.Contacts.Enabled {
 		t.Error("Contacts category should be false (privacy default) after v2->v3 migration")
 	}
-	if cfg.Tools.Android.Categories.Communication {
+	if cfg.Tools.Android.Communication.Enabled {
 		t.Error("Communication category should be false (privacy default) after v2->v3 migration")
 	}
-	if !cfg.Tools.Android.Categories.Media {
+	if !cfg.Tools.Android.Media.Enabled {
 		t.Error("Media category should be true after v2->v3 migration")
 	}
 	// Actions should all be enabled by default
-	if !cfg.Tools.Android.Actions.Alarm.SetAlarm {
+	if !cfg.Tools.Android.Alarm.Actions.SetAlarm {
 		t.Error("SetAlarm action should be true after v2->v3 migration")
 	}
-	if !cfg.Tools.Android.Actions.Web.OpenURL {
+	if !cfg.Tools.Android.Web.Actions.OpenURL {
 		t.Error("OpenURL action should be true after v2->v3 migration")
 	}
 	if cfg.Tools.Android.DisabledActions != nil {
@@ -137,20 +137,20 @@ func TestMigrateConfig_FromV2ToV3_WithDisabledActions(t *testing.T) {
 		t.Error("migrateConfig should return true")
 	}
 	// Disabled actions should be converted to false
-	if cfg.Tools.Android.Actions.Web.OpenURL {
+	if cfg.Tools.Android.Web.Actions.OpenURL {
 		t.Error("OpenURL should be false (was in DisabledActions)")
 	}
-	if cfg.Tools.Android.Actions.DeviceControl.Flashlight {
+	if cfg.Tools.Android.DeviceControl.Actions.Flashlight {
 		t.Error("Flashlight should be false (was in DisabledActions)")
 	}
-	if cfg.Tools.Android.Actions.Alarm.SetAlarm {
+	if cfg.Tools.Android.Alarm.Actions.SetAlarm {
 		t.Error("SetAlarm should be false (was in DisabledActions)")
 	}
 	// Other actions should remain true
-	if !cfg.Tools.Android.Actions.Alarm.SetTimer {
+	if !cfg.Tools.Android.Alarm.Actions.SetTimer {
 		t.Error("SetTimer should be true (was not in DisabledActions)")
 	}
-	if !cfg.Tools.Android.Actions.Web.WebSearch {
+	if !cfg.Tools.Android.Web.Actions.WebSearch {
 		t.Error("WebSearch should be true (was not in DisabledActions)")
 	}
 	// DisabledActions should be cleared

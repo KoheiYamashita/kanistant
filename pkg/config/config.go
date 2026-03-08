@@ -181,18 +181,7 @@ type MCPServerConfig struct {
 	IdleTimeout int    `json:"idle_timeout,omitempty"` // seconds, default 300
 }
 
-type AndroidCategories struct {
-	Alarm         bool `json:"alarm"          label:"Alarm"          env:"CLAWDROID_TOOLS_ANDROID_ALARM"`
-	Calendar      bool `json:"calendar"       label:"Calendar"       env:"CLAWDROID_TOOLS_ANDROID_CALENDAR"`
-	Contacts      bool `json:"contacts"       label:"Contacts"       env:"CLAWDROID_TOOLS_ANDROID_CONTACTS"`
-	Communication bool `json:"communication"  label:"Communication"  env:"CLAWDROID_TOOLS_ANDROID_COMMUNICATION"`
-	Media         bool `json:"media"          label:"Media"          env:"CLAWDROID_TOOLS_ANDROID_MEDIA"`
-	Navigation    bool `json:"navigation"     label:"Navigation"     env:"CLAWDROID_TOOLS_ANDROID_NAVIGATION"`
-	DeviceControl bool `json:"device_control" label:"Device Control" env:"CLAWDROID_TOOLS_ANDROID_DEVICE_CONTROL"`
-	Settings      bool `json:"settings"       label:"Settings"       env:"CLAWDROID_TOOLS_ANDROID_SETTINGS"`
-	Web           bool `json:"web"            label:"Web"            env:"CLAWDROID_TOOLS_ANDROID_WEB"`
-	Clipboard     bool `json:"clipboard"      label:"Clipboard"      env:"CLAWDROID_TOOLS_ANDROID_CLIPBOARD"`
-}
+// ── Per-category action structs ──
 
 type AlarmActions struct {
 	SetAlarm     bool `json:"set_alarm"      label:"Set Alarm"`
@@ -258,24 +247,71 @@ type ClipboardActions struct {
 	ClipboardRead bool `json:"clipboard_read" label:"Read"`
 }
 
-type AndroidActions struct {
-	Alarm         AlarmActions         `json:"alarm"          label:"Alarm"`
-	Calendar      CalendarActions      `json:"calendar"       label:"Calendar"`
-	Contacts      ContactsActions      `json:"contacts"       label:"Contacts"`
-	Communication CommunicationActions `json:"communication"  label:"Communication"`
-	Media         MediaActions         `json:"media"          label:"Media"`
-	Navigation    NavigationActions    `json:"navigation"     label:"Navigation"`
-	DeviceControl DeviceControlActions `json:"device_control" label:"Device Control"`
-	Settings      SettingsActions      `json:"settings"       label:"Settings"`
-	Web           WebActions           `json:"web"            label:"Web"`
-	Clipboard     ClipboardActions     `json:"clipboard"      label:"Clipboard"`
+// ── Category wrappers (Enabled toggle + Actions) ──
+
+type AlarmCategory struct {
+	Enabled bool         `json:"enabled" label:"Alarm"`
+	Actions AlarmActions `json:"actions" label:""`
+}
+
+type CalendarCategory struct {
+	Enabled bool            `json:"enabled" label:"Calendar"`
+	Actions CalendarActions `json:"actions" label:""`
+}
+
+type ContactsCategory struct {
+	Enabled bool            `json:"enabled" label:"Contacts"`
+	Actions ContactsActions `json:"actions" label:""`
+}
+
+type CommunicationCategory struct {
+	Enabled bool                 `json:"enabled" label:"Communication"`
+	Actions CommunicationActions `json:"actions" label:""`
+}
+
+type MediaCategory struct {
+	Enabled bool         `json:"enabled" label:"Media"`
+	Actions MediaActions `json:"actions" label:""`
+}
+
+type NavigationCategory struct {
+	Enabled bool              `json:"enabled" label:"Navigation"`
+	Actions NavigationActions `json:"actions" label:""`
+}
+
+type DeviceControlCategory struct {
+	Enabled bool                 `json:"enabled" label:"Device Control"`
+	Actions DeviceControlActions `json:"actions" label:""`
+}
+
+type SettingsCategory struct {
+	Enabled bool            `json:"enabled" label:"Settings"`
+	Actions SettingsActions `json:"actions" label:""`
+}
+
+type WebCategory struct {
+	Enabled bool       `json:"enabled" label:"Web"`
+	Actions WebActions `json:"actions" label:""`
+}
+
+type ClipboardCategory struct {
+	Enabled bool             `json:"enabled" label:"Clipboard"`
+	Actions ClipboardActions `json:"actions" label:""`
 }
 
 type AndroidToolsConfig struct {
-	Enabled         bool              `json:"enabled"                    label:"Enabled"    env:"CLAWDROID_TOOLS_ANDROID_ENABLED"`
-	Categories      AndroidCategories `json:"categories"                label:"Categories"`
-	Actions         AndroidActions    `json:"actions"                   label:"Actions"`
-	DisabledActions []string          `json:"disabled_actions,omitempty" label:""`
+	Enabled         bool                  `json:"enabled"                    label:"Enabled" env:"CLAWDROID_TOOLS_ANDROID_ENABLED"`
+	Alarm           AlarmCategory         `json:"alarm"                     label:"Alarm"`
+	Calendar        CalendarCategory      `json:"calendar"                  label:"Calendar"`
+	Contacts        ContactsCategory      `json:"contacts"                  label:"Contacts"`
+	Communication   CommunicationCategory `json:"communication"            label:"Communication"`
+	Media           MediaCategory         `json:"media"                     label:"Media"`
+	Navigation      NavigationCategory    `json:"navigation"               label:"Navigation"`
+	DeviceControl   DeviceControlCategory `json:"device_control"           label:"Device Control"`
+	Settings        SettingsCategory      `json:"settings"                 label:"Settings"`
+	Web             WebCategory           `json:"web"                      label:"Web"`
+	Clipboard       ClipboardCategory     `json:"clipboard"                label:"Clipboard"`
+	DisabledActions []string              `json:"disabled_actions,omitempty" label:""`
 }
 
 type MemoryToolsConfig struct {
@@ -355,22 +391,7 @@ func DefaultConfig() *Config {
 			Exec: ExecToolsConfig{
 				Enabled: false,
 			},
-			Android: AndroidToolsConfig{
-				Enabled: true,
-				Categories: AndroidCategories{
-					Alarm:         true,
-					Calendar:      true,
-					Contacts:      false,
-					Communication: false,
-					Media:         true,
-					Navigation:    true,
-					DeviceControl: true,
-					Settings:      true,
-					Web:           true,
-					Clipboard:     true,
-				},
-				Actions: DefaultAndroidActions(),
-			},
+			Android: DefaultAndroidToolsConfig(),
 			Memory: MemoryToolsConfig{
 				Enabled: true,
 			},
@@ -480,19 +501,32 @@ func (c *Config) DataPath() string {
 	return expandHome(c.Agents.Defaults.DataDir)
 }
 
-// DefaultAndroidActions returns an AndroidActions with all actions enabled.
-func DefaultAndroidActions() AndroidActions {
-	return AndroidActions{
-		Alarm:         AlarmActions{SetAlarm: true, SetTimer: true, DismissAlarm: true, ShowAlarms: true},
-		Calendar:      CalendarActions{CreateEvent: true, QueryEvents: true, UpdateEvent: true, DeleteEvent: true, ListCalendars: true, AddReminder: true},
-		Contacts:      ContactsActions{SearchContacts: true, GetContactDetail: true, AddContact: true},
-		Communication: CommunicationActions{Dial: true, ComposeSMS: true, ComposeEmail: true},
-		Media:         MediaActions{PlayPause: true, Next: true, Previous: true, PlayMusicSearch: true},
-		Navigation:    NavigationActions{Navigate: true, SearchNearby: true, ShowMap: true, GetCurrentLocation: true},
-		DeviceControl: DeviceControlActions{Flashlight: true, SetVolume: true, SetRingerMode: true, SetDND: true, SetBrightness: true},
-		Settings:      SettingsActions{OpenSettings: true},
-		Web:           WebActions{OpenURL: true, WebSearch: true},
-		Clipboard:     ClipboardActions{ClipboardCopy: true, ClipboardRead: true},
+// DefaultAndroidToolsConfig returns the default AndroidToolsConfig with
+// all categories and actions enabled (except Contacts/Communication for privacy).
+func DefaultAndroidToolsConfig() AndroidToolsConfig {
+	allAlarm := AlarmActions{SetAlarm: true, SetTimer: true, DismissAlarm: true, ShowAlarms: true}
+	allCalendar := CalendarActions{CreateEvent: true, QueryEvents: true, UpdateEvent: true, DeleteEvent: true, ListCalendars: true, AddReminder: true}
+	allContacts := ContactsActions{SearchContacts: true, GetContactDetail: true, AddContact: true}
+	allComm := CommunicationActions{Dial: true, ComposeSMS: true, ComposeEmail: true}
+	allMedia := MediaActions{PlayPause: true, Next: true, Previous: true, PlayMusicSearch: true}
+	allNav := NavigationActions{Navigate: true, SearchNearby: true, ShowMap: true, GetCurrentLocation: true}
+	allDevice := DeviceControlActions{Flashlight: true, SetVolume: true, SetRingerMode: true, SetDND: true, SetBrightness: true}
+	allSettings := SettingsActions{OpenSettings: true}
+	allWeb := WebActions{OpenURL: true, WebSearch: true}
+	allClipboard := ClipboardActions{ClipboardCopy: true, ClipboardRead: true}
+
+	return AndroidToolsConfig{
+		Enabled:       true,
+		Alarm:         AlarmCategory{Enabled: true, Actions: allAlarm},
+		Calendar:      CalendarCategory{Enabled: true, Actions: allCalendar},
+		Contacts:      ContactsCategory{Enabled: false, Actions: allContacts},
+		Communication: CommunicationCategory{Enabled: false, Actions: allComm},
+		Media:         MediaCategory{Enabled: true, Actions: allMedia},
+		Navigation:    NavigationCategory{Enabled: true, Actions: allNav},
+		DeviceControl: DeviceControlCategory{Enabled: true, Actions: allDevice},
+		Settings:      SettingsCategory{Enabled: true, Actions: allSettings},
+		Web:           WebCategory{Enabled: true, Actions: allWeb},
+		Clipboard:     ClipboardCategory{Enabled: true, Actions: allClipboard},
 	}
 }
 

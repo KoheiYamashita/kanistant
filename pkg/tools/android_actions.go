@@ -266,86 +266,85 @@ func enabledActions(cfg config.AndroidToolsConfig, clientType string) []androidA
 // isActionDisabledByConfig checks if a specific action is disabled via the Actions struct.
 // Core actions (no category) are always enabled.
 func isActionDisabledByConfig(cfg config.AndroidToolsConfig, action string) bool {
-	a := cfg.Actions
 	switch action {
 	// Alarm
 	case "set_alarm":
-		return !a.Alarm.SetAlarm
+		return !cfg.Alarm.Actions.SetAlarm
 	case "set_timer":
-		return !a.Alarm.SetTimer
+		return !cfg.Alarm.Actions.SetTimer
 	case "dismiss_alarm":
-		return !a.Alarm.DismissAlarm
+		return !cfg.Alarm.Actions.DismissAlarm
 	case "show_alarms":
-		return !a.Alarm.ShowAlarms
+		return !cfg.Alarm.Actions.ShowAlarms
 	// Calendar
 	case "create_event":
-		return !a.Calendar.CreateEvent
+		return !cfg.Calendar.Actions.CreateEvent
 	case "query_events":
-		return !a.Calendar.QueryEvents
+		return !cfg.Calendar.Actions.QueryEvents
 	case "update_event":
-		return !a.Calendar.UpdateEvent
+		return !cfg.Calendar.Actions.UpdateEvent
 	case "delete_event":
-		return !a.Calendar.DeleteEvent
+		return !cfg.Calendar.Actions.DeleteEvent
 	case "list_calendars":
-		return !a.Calendar.ListCalendars
+		return !cfg.Calendar.Actions.ListCalendars
 	case "add_reminder":
-		return !a.Calendar.AddReminder
+		return !cfg.Calendar.Actions.AddReminder
 	// Contacts
 	case "search_contacts":
-		return !a.Contacts.SearchContacts
+		return !cfg.Contacts.Actions.SearchContacts
 	case "get_contact_detail":
-		return !a.Contacts.GetContactDetail
+		return !cfg.Contacts.Actions.GetContactDetail
 	case "add_contact":
-		return !a.Contacts.AddContact
+		return !cfg.Contacts.Actions.AddContact
 	// Communication
 	case "dial":
-		return !a.Communication.Dial
+		return !cfg.Communication.Actions.Dial
 	case "compose_sms":
-		return !a.Communication.ComposeSMS
+		return !cfg.Communication.Actions.ComposeSMS
 	case "compose_email":
-		return !a.Communication.ComposeEmail
+		return !cfg.Communication.Actions.ComposeEmail
 	// Media
 	case "media_play_pause":
-		return !a.Media.PlayPause
+		return !cfg.Media.Actions.PlayPause
 	case "media_next":
-		return !a.Media.Next
+		return !cfg.Media.Actions.Next
 	case "media_previous":
-		return !a.Media.Previous
+		return !cfg.Media.Actions.Previous
 	case "play_music_search":
-		return !a.Media.PlayMusicSearch
+		return !cfg.Media.Actions.PlayMusicSearch
 	// Navigation
 	case "navigate":
-		return !a.Navigation.Navigate
+		return !cfg.Navigation.Actions.Navigate
 	case "search_nearby":
-		return !a.Navigation.SearchNearby
+		return !cfg.Navigation.Actions.SearchNearby
 	case "show_map":
-		return !a.Navigation.ShowMap
+		return !cfg.Navigation.Actions.ShowMap
 	case "get_current_location":
-		return !a.Navigation.GetCurrentLocation
+		return !cfg.Navigation.Actions.GetCurrentLocation
 	// Device Control
 	case "flashlight":
-		return !a.DeviceControl.Flashlight
+		return !cfg.DeviceControl.Actions.Flashlight
 	case "set_volume":
-		return !a.DeviceControl.SetVolume
+		return !cfg.DeviceControl.Actions.SetVolume
 	case "set_ringer_mode":
-		return !a.DeviceControl.SetRingerMode
+		return !cfg.DeviceControl.Actions.SetRingerMode
 	case "set_dnd":
-		return !a.DeviceControl.SetDND
+		return !cfg.DeviceControl.Actions.SetDND
 	case "set_brightness":
-		return !a.DeviceControl.SetBrightness
+		return !cfg.DeviceControl.Actions.SetBrightness
 	// Settings
 	case "open_settings":
-		return !a.Settings.OpenSettings
+		return !cfg.Settings.Actions.OpenSettings
 	// Web
 	case "open_url":
-		return !a.Web.OpenURL
+		return !cfg.Web.Actions.OpenURL
 	case "web_search":
-		return !a.Web.WebSearch
+		return !cfg.Web.Actions.WebSearch
 	// Clipboard
 	case "clipboard_copy":
-		return !a.Clipboard.ClipboardCopy
+		return !cfg.Clipboard.Actions.ClipboardCopy
 	case "clipboard_read":
-		return !a.Clipboard.ClipboardRead
+		return !cfg.Clipboard.Actions.ClipboardRead
 	default:
 		return false // core actions are never disabled
 	}
@@ -355,25 +354,25 @@ func isActionDisabledByConfig(cfg config.AndroidToolsConfig, action string) bool
 func isCategoryEnabled(cfg config.AndroidToolsConfig, category string) bool {
 	switch category {
 	case "alarm":
-		return cfg.Categories.Alarm
+		return cfg.Alarm.Enabled
 	case "calendar":
-		return cfg.Categories.Calendar
+		return cfg.Calendar.Enabled
 	case "contacts":
-		return cfg.Categories.Contacts
+		return cfg.Contacts.Enabled
 	case "communication":
-		return cfg.Categories.Communication
+		return cfg.Communication.Enabled
 	case "media":
-		return cfg.Categories.Media
+		return cfg.Media.Enabled
 	case "navigation":
-		return cfg.Categories.Navigation
+		return cfg.Navigation.Enabled
 	case "device_control":
-		return cfg.Categories.DeviceControl
+		return cfg.DeviceControl.Enabled
 	case "settings":
-		return cfg.Categories.Settings
+		return cfg.Settings.Enabled
 	case "web":
-		return cfg.Categories.Web
+		return cfg.Web.Enabled
 	case "clipboard":
-		return cfg.Categories.Clipboard
+		return cfg.Clipboard.Enabled
 	default:
 		return false
 	}

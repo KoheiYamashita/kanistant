@@ -36,148 +36,136 @@ func migrateV1ToV2(cfg *Config) {
 }
 
 func migrateV2ToV3(cfg *Config) {
-	cfg.Tools.Android.Categories = AndroidCategories{
-		Alarm:         true,
-		Calendar:      true,
-		Contacts:      false,
-		Communication: false,
-		Media:         true,
-		Navigation:    true,
-		DeviceControl: true,
-		Settings:      true,
-		Web:           true,
-		Clipboard:     true,
-	}
+	// Start from defaults (all actions enabled, privacy categories off).
+	def := DefaultAndroidToolsConfig()
+	// Preserve the existing Enabled flag.
+	def.Enabled = cfg.Tools.Android.Enabled
 
-	// Set all actions to enabled by default, then disable any that were
-	// listed in the old DisabledActions string slice.
-	actions := DefaultAndroidActions()
-
+	// Convert old DisabledActions to individual action bools.
 	disabled := make(map[string]bool, len(cfg.Tools.Android.DisabledActions))
 	for _, d := range cfg.Tools.Android.DisabledActions {
 		disabled[d] = true
 	}
-
 	if len(disabled) > 0 {
-		disableAndroidActions(&actions, disabled)
+		disableActions(&def, disabled)
 	}
+	def.DisabledActions = nil
 
-	cfg.Tools.Android.Actions = actions
-	cfg.Tools.Android.DisabledActions = nil
+	cfg.Tools.Android = def
 }
 
-// disableAndroidActions sets action fields to false for any action name present in disabled.
-func disableAndroidActions(a *AndroidActions, disabled map[string]bool) {
+// disableActions sets action fields to false for any action name present in disabled.
+func disableActions(cfg *AndroidToolsConfig, disabled map[string]bool) {
 	// Alarm
 	if disabled["set_alarm"] {
-		a.Alarm.SetAlarm = false
+		cfg.Alarm.Actions.SetAlarm = false
 	}
 	if disabled["set_timer"] {
-		a.Alarm.SetTimer = false
+		cfg.Alarm.Actions.SetTimer = false
 	}
 	if disabled["dismiss_alarm"] {
-		a.Alarm.DismissAlarm = false
+		cfg.Alarm.Actions.DismissAlarm = false
 	}
 	if disabled["show_alarms"] {
-		a.Alarm.ShowAlarms = false
+		cfg.Alarm.Actions.ShowAlarms = false
 	}
 	// Calendar
 	if disabled["create_event"] {
-		a.Calendar.CreateEvent = false
+		cfg.Calendar.Actions.CreateEvent = false
 	}
 	if disabled["query_events"] {
-		a.Calendar.QueryEvents = false
+		cfg.Calendar.Actions.QueryEvents = false
 	}
 	if disabled["update_event"] {
-		a.Calendar.UpdateEvent = false
+		cfg.Calendar.Actions.UpdateEvent = false
 	}
 	if disabled["delete_event"] {
-		a.Calendar.DeleteEvent = false
+		cfg.Calendar.Actions.DeleteEvent = false
 	}
 	if disabled["list_calendars"] {
-		a.Calendar.ListCalendars = false
+		cfg.Calendar.Actions.ListCalendars = false
 	}
 	if disabled["add_reminder"] {
-		a.Calendar.AddReminder = false
+		cfg.Calendar.Actions.AddReminder = false
 	}
 	// Contacts
 	if disabled["search_contacts"] {
-		a.Contacts.SearchContacts = false
+		cfg.Contacts.Actions.SearchContacts = false
 	}
 	if disabled["get_contact_detail"] {
-		a.Contacts.GetContactDetail = false
+		cfg.Contacts.Actions.GetContactDetail = false
 	}
 	if disabled["add_contact"] {
-		a.Contacts.AddContact = false
+		cfg.Contacts.Actions.AddContact = false
 	}
 	// Communication
 	if disabled["dial"] {
-		a.Communication.Dial = false
+		cfg.Communication.Actions.Dial = false
 	}
 	if disabled["compose_sms"] {
-		a.Communication.ComposeSMS = false
+		cfg.Communication.Actions.ComposeSMS = false
 	}
 	if disabled["compose_email"] {
-		a.Communication.ComposeEmail = false
+		cfg.Communication.Actions.ComposeEmail = false
 	}
 	// Media
 	if disabled["media_play_pause"] {
-		a.Media.PlayPause = false
+		cfg.Media.Actions.PlayPause = false
 	}
 	if disabled["media_next"] {
-		a.Media.Next = false
+		cfg.Media.Actions.Next = false
 	}
 	if disabled["media_previous"] {
-		a.Media.Previous = false
+		cfg.Media.Actions.Previous = false
 	}
 	if disabled["play_music_search"] {
-		a.Media.PlayMusicSearch = false
+		cfg.Media.Actions.PlayMusicSearch = false
 	}
 	// Navigation
 	if disabled["navigate"] {
-		a.Navigation.Navigate = false
+		cfg.Navigation.Actions.Navigate = false
 	}
 	if disabled["search_nearby"] {
-		a.Navigation.SearchNearby = false
+		cfg.Navigation.Actions.SearchNearby = false
 	}
 	if disabled["show_map"] {
-		a.Navigation.ShowMap = false
+		cfg.Navigation.Actions.ShowMap = false
 	}
 	if disabled["get_current_location"] {
-		a.Navigation.GetCurrentLocation = false
+		cfg.Navigation.Actions.GetCurrentLocation = false
 	}
 	// Device Control
 	if disabled["flashlight"] {
-		a.DeviceControl.Flashlight = false
+		cfg.DeviceControl.Actions.Flashlight = false
 	}
 	if disabled["set_volume"] {
-		a.DeviceControl.SetVolume = false
+		cfg.DeviceControl.Actions.SetVolume = false
 	}
 	if disabled["set_ringer_mode"] {
-		a.DeviceControl.SetRingerMode = false
+		cfg.DeviceControl.Actions.SetRingerMode = false
 	}
 	if disabled["set_dnd"] {
-		a.DeviceControl.SetDND = false
+		cfg.DeviceControl.Actions.SetDND = false
 	}
 	if disabled["set_brightness"] {
-		a.DeviceControl.SetBrightness = false
+		cfg.DeviceControl.Actions.SetBrightness = false
 	}
 	// Settings
 	if disabled["open_settings"] {
-		a.Settings.OpenSettings = false
+		cfg.Settings.Actions.OpenSettings = false
 	}
 	// Web
 	if disabled["open_url"] {
-		a.Web.OpenURL = false
+		cfg.Web.Actions.OpenURL = false
 	}
 	if disabled["web_search"] {
-		a.Web.WebSearch = false
+		cfg.Web.Actions.WebSearch = false
 	}
 	// Clipboard
 	if disabled["clipboard_copy"] {
-		a.Clipboard.ClipboardCopy = false
+		cfg.Clipboard.Actions.ClipboardCopy = false
 	}
 	if disabled["clipboard_read"] {
-		a.Clipboard.ClipboardRead = false
+		cfg.Clipboard.Actions.ClipboardRead = false
 	}
 }

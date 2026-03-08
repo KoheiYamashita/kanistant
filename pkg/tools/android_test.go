@@ -7,22 +7,11 @@ import (
 )
 
 func allEnabledConfig() config.AndroidToolsConfig {
-	return config.AndroidToolsConfig{
-		Enabled: true,
-		Categories: config.AndroidCategories{
-			Alarm:         true,
-			Calendar:      true,
-			Contacts:      true,
-			Communication: true,
-			Media:         true,
-			Navigation:    true,
-			DeviceControl: true,
-			Settings:      true,
-			Web:           true,
-			Clipboard:     true,
-		},
-		Actions: config.DefaultAndroidActions(),
-	}
+	cfg := config.DefaultAndroidToolsConfig()
+	// Enable privacy categories for testing
+	cfg.Contacts.Enabled = true
+	cfg.Communication.Enabled = true
+	return cfg
 }
 
 func defaultConfig() config.AndroidToolsConfig {
@@ -49,7 +38,7 @@ func TestEnabledActions_HidesUIActionsForMain(t *testing.T) {
 
 func TestEnabledActions_FiltersDisabledCategory(t *testing.T) {
 	cfg := allEnabledConfig()
-	cfg.Categories.Alarm = false
+	cfg.Alarm.Enabled = false
 
 	actions := enabledActions(cfg, "overlay")
 	for _, a := range actions {
@@ -61,7 +50,7 @@ func TestEnabledActions_FiltersDisabledCategory(t *testing.T) {
 
 func TestEnabledActions_FiltersDisabledActions(t *testing.T) {
 	cfg := allEnabledConfig()
-	cfg.Actions.Web.OpenURL = false
+	cfg.Web.Actions.OpenURL = false
 
 	actions := enabledActions(cfg, "overlay")
 	for _, a := range actions {
@@ -100,7 +89,7 @@ func TestIsActionEnabled_DisabledCategory(t *testing.T) {
 
 func TestIsActionEnabled_IndividualDisable(t *testing.T) {
 	cfg := allEnabledConfig()
-	cfg.Actions.DeviceControl.Flashlight = false
+	cfg.DeviceControl.Actions.Flashlight = false
 	tool := NewAndroidTool(cfg)
 	if tool.isActionEnabled("flashlight") {
 		t.Error("flashlight should be disabled when action toggle is false")
