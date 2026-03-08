@@ -8,13 +8,7 @@ import (
 
 	anyllm "github.com/mozilla-ai/any-llm-go"
 	"github.com/mozilla-ai/any-llm-go/providers/anthropic"
-	"github.com/mozilla-ai/any-llm-go/providers/deepseek"
 	"github.com/mozilla-ai/any-llm-go/providers/gemini"
-	"github.com/mozilla-ai/any-llm-go/providers/groq"
-	"github.com/mozilla-ai/any-llm-go/providers/llamacpp"
-	"github.com/mozilla-ai/any-llm-go/providers/llamafile"
-	"github.com/mozilla-ai/any-llm-go/providers/mistral"
-	"github.com/mozilla-ai/any-llm-go/providers/ollama"
 	"github.com/mozilla-ai/any-llm-go/providers/openai"
 )
 
@@ -79,24 +73,12 @@ func createAnyLLMProvider(name, apiKey, baseURL string) (anyllm.Provider, error)
 	switch name {
 	case "anthropic":
 		return anthropic.New(opts...)
-	case "deepseek":
-		return deepseek.New(opts...)
 	case "gemini":
 		return gemini.New(opts...)
-	case "groq":
-		return groq.New(opts...)
-	case "llamacpp":
-		return llamacpp.New(opts...)
-	case "llamafile":
-		return llamafile.New(opts...)
-	case "mistral":
-		return mistral.New(opts...)
-	case "ollama":
-		return ollama.New(opts...)
 	case "openai":
 		return openai.New(opts...)
 	default:
-		return nil, fmt.Errorf("unsupported provider %q", name)
+		return nil, fmt.Errorf("unsupported provider %q (use openai with base_url for OpenAI-compatible providers)", name)
 	}
 }
 

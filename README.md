@@ -263,15 +263,8 @@ Uses [any-llm-go](https://github.com/mozilla-ai/any-llm-go) as a unified adapter
 | OpenAI | `openai/model` | `openai/gpt-4o` |
 | Anthropic | `anthropic/model` or `claude/model` | `anthropic/claude-3-5-sonnet` |
 | Google Gemini | `gemini/model` or `google/model` | `gemini/gemini-2.0-flash` |
-| DeepSeek | `deepseek/model` | `deepseek/deepseek-chat` |
-| Groq | `groq/model` | `groq/llama-3.3-70b` |
-| Mistral | `mistral/model` | `mistral/mistral-large-latest` |
-| Ollama | `ollama/model` | `ollama/llama3` |
-| LlamaCpp | `llamacpp/model` | `llamacpp/local` |
-| Llamafile | `llamafile/model` | `llamafile/local` |
-| ZhiPu | `zhipu/model` | `zhipu/glm-4.7` |
 
-`base_url` can point to any OpenAI-compatible endpoint (OpenRouter, local proxies, etc.).
+`base_url` can point to any OpenAI-compatible endpoint (xAI, DeepSeek, Groq, OpenRouter, Ollama, etc.).
 
 ## Termux Version
 
