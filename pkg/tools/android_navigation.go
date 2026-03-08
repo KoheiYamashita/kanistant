@@ -38,7 +38,7 @@ func validateNavigationParams(action string, args map[string]interface{}) (map[s
 		query := toString(args["query"])
 		lat, latOk := toFloat64(args["latitude"])
 		lng, lngOk := toFloat64(args["longitude"])
-		if query == "" && !(latOk && lngOk) {
+		if query == "" && (!latOk || !lngOk) {
 			return nil, fmt.Errorf("show_map requires query or latitude+longitude")
 		}
 		if query != "" {

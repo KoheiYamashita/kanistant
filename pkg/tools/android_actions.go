@@ -318,7 +318,9 @@ func buildParameters(actions []androidAction) map[string]interface{} {
 		names = append(names, a.Name)
 	}
 
-	// Collect all unique parameters across enabled actions
+	// Collect all unique parameters across enabled actions.
+	// When the same parameter name appears in multiple actions, merge their
+	// descriptions so the LLM sees all usages (e.g. "query" used by several actions).
 	props := map[string]interface{}{
 		"action": map[string]interface{}{
 			"type":        "string",
@@ -327,22 +329,45 @@ func buildParameters(actions []androidAction) map[string]interface{} {
 		},
 	}
 
-	seen := map[string]bool{"action": true}
+	type paramMeta struct {
+		Type  string
+		Descs []string
+		Enum  []string
+	}
+	seen := map[string]*paramMeta{}
 	for _, a := range actions {
 		for _, p := range a.Params {
-			if seen[p.Name] {
+			if m, ok := seen[p.Name]; ok {
+				// Append description if it differs from existing ones
+				dup := false
+				for _, d := range m.Descs {
+					if d == p.Desc {
+						dup = true
+						break
+					}
+				}
+				if !dup {
+					m.Descs = append(m.Descs, p.Desc)
+				}
 				continue
 			}
-			seen[p.Name] = true
-			prop := map[string]interface{}{
-				"type":        p.Type,
-				"description": p.Desc,
+			seen[p.Name] = &paramMeta{
+				Type:  p.Type,
+				Descs: []string{p.Desc},
+				Enum:  p.Enum,
 			}
-			if len(p.Enum) > 0 {
-				prop["enum"] = p.Enum
-			}
-			props[p.Name] = prop
 		}
+	}
+	for name, m := range seen {
+		desc := strings.Join(m.Descs, "; ")
+		prop := map[string]interface{}{
+			"type":        m.Type,
+			"description": desc,
+		}
+		if len(m.Enum) > 0 {
+			prop["enum"] = m.Enum
+		}
+		props[name] = prop
 	}
 
 	return map[string]interface{}{

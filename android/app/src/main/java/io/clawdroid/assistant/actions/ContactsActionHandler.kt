@@ -28,8 +28,9 @@ class ContactsActionHandler : ActionHandler {
             ContactsContract.Contacts.DISPLAY_NAME_PRIMARY,
             ContactsContract.Contacts.HAS_PHONE_NUMBER
         )
-        val selection = "${ContactsContract.Contacts.DISPLAY_NAME_PRIMARY} LIKE ?"
-        val selectionArgs = arrayOf("%$query%")
+        val escapedQuery = query.replace("%", "\\%").replace("_", "\\_")
+        val selection = "${ContactsContract.Contacts.DISPLAY_NAME_PRIMARY} LIKE ? ESCAPE '\\'"
+        val selectionArgs = arrayOf("%$escapedQuery%")
 
         return try {
             val cursor = context.contentResolver.query(uri, projection, selection, selectionArgs, null)

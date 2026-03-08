@@ -190,7 +190,7 @@ type AndroidCategories struct {
 	Navigation    bool `json:"navigation"     label:"Navigation"     env:"CLAWDROID_TOOLS_ANDROID_NAVIGATION"`
 	DeviceControl bool `json:"device_control" label:"Device Control" env:"CLAWDROID_TOOLS_ANDROID_DEVICE_CONTROL"`
 	Settings      bool `json:"settings"       label:"Settings"       env:"CLAWDROID_TOOLS_ANDROID_SETTINGS"`
-	Web           bool `json:"web_actions"    label:"Web Actions"    env:"CLAWDROID_TOOLS_ANDROID_WEB"`
+	Web           bool `json:"web"            label:"Web"            env:"CLAWDROID_TOOLS_ANDROID_WEB"`
 	Clipboard     bool `json:"clipboard"      label:"Clipboard"      env:"CLAWDROID_TOOLS_ANDROID_CLIPBOARD"`
 }
 

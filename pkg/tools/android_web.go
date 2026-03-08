@@ -1,9 +1,18 @@
 package tools
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func init() {
 	registerCategoryValidator(validateWebParams, "open_url", "web_search")
+}
+
+// allowedSchemes is the set of URL schemes allowed for open_url.
+var allowedSchemes = map[string]bool{
+	"http":  true,
+	"https": true,
 }
 
 func validateWebParams(action string, args map[string]interface{}) (map[string]interface{}, error) {
@@ -11,11 +20,15 @@ func validateWebParams(action string, args map[string]interface{}) (map[string]i
 
 	switch action {
 	case "open_url":
-		url := toString(args["url"])
-		if url == "" {
+		rawURL := toString(args["url"])
+		if rawURL == "" {
 			return nil, fmt.Errorf("open_url requires url")
 		}
-		params["url"] = url
+		scheme := strings.SplitN(rawURL, ":", 2)[0]
+		if !allowedSchemes[strings.ToLower(scheme)] {
+			return nil, fmt.Errorf("open_url: scheme %q not allowed (only http/https)", scheme)
+		}
+		params["url"] = rawURL
 
 	case "web_search":
 		query := toString(args["query"])
