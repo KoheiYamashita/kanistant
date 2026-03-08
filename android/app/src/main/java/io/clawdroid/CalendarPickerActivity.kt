@@ -4,8 +4,29 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.CalendarContract
-import android.app.AlertDialog
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import io.clawdroid.core.ui.theme.ClawDroidTheme
+import io.clawdroid.core.ui.theme.GlassBorder
+import io.clawdroid.core.ui.theme.NeonCyan
+import io.clawdroid.core.ui.theme.TextPrimary
+import io.clawdroid.core.ui.theme.TextSecondary
+import io.clawdroid.core.ui.theme.DarkCard
 
 class CalendarPickerActivity : ComponentActivity() {
 
@@ -23,7 +44,21 @@ class CalendarPickerActivity : ComponentActivity() {
                 broadcastResult(calendarId = id, calendarName = name)
                 finish()
             }
-            else -> showPickerDialog(calendars)
+            else -> setContent {
+                ClawDroidTheme {
+                    CalendarPickerDialog(
+                        calendars = calendars,
+                        onSelect = { cal ->
+                            broadcastResult(calendarId = cal.id, calendarName = cal.displayName)
+                            finish()
+                        },
+                        onCancel = {
+                            broadcastResult(cancelled = true)
+                            finish()
+                        }
+                    )
+                }
+            }
         }
     }
 
@@ -49,20 +84,52 @@ class CalendarPickerActivity : ComponentActivity() {
         }
     }
 
-    private fun showPickerDialog(calendars: List<CalendarInfo>) {
-        val names = calendars.map { it.displayName }.toTypedArray()
-        AlertDialog.Builder(this)
-            .setTitle("Select Calendar")
-            .setItems(names) { _, which ->
-                val selected = calendars[which]
-                broadcastResult(calendarId = selected.id, calendarName = selected.displayName)
-                finish()
-            }
-            .setOnCancelListener {
-                broadcastResult(cancelled = true)
-                finish()
-            }
-            .show()
+    @Composable
+    private fun CalendarPickerDialog(
+        calendars: List<CalendarInfo>,
+        onSelect: (CalendarInfo) -> Unit,
+        onCancel: () -> Unit,
+    ) {
+        AlertDialog(
+            onDismissRequest = onCancel,
+            containerColor = DarkCard,
+            title = {
+                Text("Select Calendar", color = NeonCyan)
+            },
+            text = {
+                Surface(
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, GlassBorder),
+                    color = DarkCard,
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        calendars.forEachIndexed { index, cal ->
+                            Text(
+                                text = cal.displayName,
+                                color = TextPrimary,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onSelect(cal) }
+                                    .padding(horizontal = 16.dp, vertical = 14.dp)
+                            )
+                            if (index < calendars.lastIndex) {
+                                HorizontalDivider(color = GlassBorder)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = onCancel) {
+                    Text("Cancel", color = TextSecondary)
+                }
+            },
+        )
     }
 
     private fun broadcastResult(

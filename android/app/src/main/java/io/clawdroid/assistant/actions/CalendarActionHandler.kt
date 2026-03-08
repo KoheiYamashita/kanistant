@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.provider.CalendarContract
-import android.util.Log
 import androidx.core.content.ContextCompat
 import io.clawdroid.CalendarPickerActivity
 import io.clawdroid.core.data.remote.dto.ToolRequest
@@ -17,8 +16,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import java.net.HttpURLConnection
-import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
@@ -46,11 +43,10 @@ class CalendarActionHandler : ActionHandler {
     private val writeActions = setOf("create_event", "update_event", "add_reminder")
 
     override suspend fun handle(request: ToolRequest, context: Context): ToolResponse {
-        // For write actions without calendar_id, launch picker and save to config
+        // For write actions without calendar_id, launch picker
         val resolvedRequest = if (request.action in writeActions && request.stringParam("calendar_id") == null) {
             val picked = pickCalendar(context)
                 ?: return ToolResponse(request.requestId, false, error = "Calendar selection cancelled")
-            saveCalendarIdToConfig(picked.first)
             request.withParam("calendar_id", picked.first)
         } else {
             request
@@ -95,23 +91,6 @@ class CalendarActionHandler : ActionHandler {
 
                 context.startActivity(CalendarPickerActivity.intent(context))
             }
-        }
-    }
-
-    private fun saveCalendarIdToConfig(calendarId: String) {
-        try {
-            val url = URL("http://127.0.0.1:18790/api/config")
-            val conn = url.openConnection() as HttpURLConnection
-            conn.requestMethod = "PUT"
-            conn.setRequestProperty("Content-Type", "application/json")
-            conn.doOutput = true
-            // Patch only the calendar_id field
-            val body = """{"tools":{"android":{"calendar":{"calendar_id":"$calendarId"}}}}"""
-            conn.outputStream.use { it.write(body.toByteArray()) }
-            conn.responseCode // trigger the request
-            conn.disconnect()
-        } catch (e: Exception) {
-            Log.w("CalendarActionHandler", "Failed to save calendar_id to config", e)
         }
     }
 

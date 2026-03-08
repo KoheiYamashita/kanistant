@@ -247,9 +247,11 @@ func (t *AndroidTool) validateAndBuildParams(action string, args map[string]inte
 				return nil, err
 			}
 			// Inject calendar_id from config for calendar actions
-			if t.cfg.Calendar.CalendarID != "" && actionCategory(action) == "calendar" {
+			if actionCategory(action) == "calendar" {
 				if _, exists := params["calendar_id"]; !exists {
-					params["calendar_id"] = t.cfg.Calendar.CalendarID
+					if calID := t.cfg.Calendar.CalendarID; calID != "" {
+						params["calendar_id"] = calID
+					}
 				}
 			}
 			return params, nil
