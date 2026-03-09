@@ -1,4 +1,5 @@
 <resources>
+    <string name="app_name">ClawDroid</string>
     <string name="accessibility_service_description">音声アシスタントの会話中にスクリーンショットを撮影できるようにします。</string>
 
     <!-- Setup Step 1: Gateway -->
@@ -61,4 +62,5 @@
     <string name="notification_channel_assistant_desc">アシスタントオーバーレイサービス</string>
     <string name="notification_channel_gateway">ゲートウェイ</string>
     <string name="notification_channel_gateway_desc">ゲートウェイバックエンドサービス</string>
+    <string name="notification_title">ClawDroid</string>
 </resources>

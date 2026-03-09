@@ -7,7 +7,6 @@
     <string name="setup_gateway_title">Gateway Connection</string>
     <string name="setup_gateway_description">The gateway handles communication between this app and the Go backend running locally. An API key is required to authenticate requests between them.</string>
     <string name="setup_gateway_port_label">Port</string>
-    <string name="setup_gateway_port_placeholder">18790</string>
     <string name="setup_gateway_port_hint">Local port for backend communication (default: 18790)</string>
     <string name="setup_gateway_api_key_label">API Key</string>
     <string name="setup_gateway_api_key_hint">Secures communication between this app and the backend. Use \'Generate\' to create one automatically.</string>
@@ -31,10 +30,8 @@
     <string name="setup_workspace_title">Workspace &amp; Data</string>
     <string name="setup_workspace_description">The workspace is where the agent reads and writes your files. The data directory stores internal data such as memory and logs.</string>
     <string name="setup_workspace_label">Workspace</string>
-    <string name="setup_workspace_placeholder">~/.clawdroid/workspace</string>
     <string name="setup_workspace_hint">Directory where the agent reads and writes files</string>
     <string name="setup_data_dir_label">Data Directory</string>
-    <string name="setup_data_dir_placeholder">~/.clawdroid/data</string>
     <string name="setup_data_dir_hint">Directory for internal data such as memory and logs</string>
 
     <!-- Setup Step 4: Complete -->
@@ -56,7 +53,6 @@
     <string name="app_settings_title">Connection</string>
     <string name="app_settings_gateway_section">Gateway Connection</string>
     <string name="app_settings_port_label">Port</string>
-    <string name="app_settings_port_placeholder">18790</string>
     <string name="app_settings_api_key_label">API Key</string>
 
     <!-- Notification -->

@@ -75,7 +75,7 @@ fun SetupStep3WorkspaceScreen(viewModel: SetupViewModel) {
             value = uiState.workspace,
             onValueChange = viewModel::onWorkspaceChange,
             label = stringResource(R.string.setup_workspace_label),
-            placeholder = stringResource(R.string.setup_workspace_placeholder),
+            placeholder = "~/.clawdroid/workspace",
             supportingText = stringResource(R.string.setup_workspace_hint),
             onBrowse = { workspacePicker.launch(null) },
         )
@@ -84,7 +84,7 @@ fun SetupStep3WorkspaceScreen(viewModel: SetupViewModel) {
             value = uiState.dataDir,
             onValueChange = viewModel::onDataDirChange,
             label = stringResource(R.string.setup_data_dir_label),
-            placeholder = stringResource(R.string.setup_data_dir_placeholder),
+            placeholder = "~/.clawdroid/data",
             supportingText = stringResource(R.string.setup_data_dir_hint),
             onBrowse = { dataDirPicker.launch(null) },
         )

@@ -141,7 +141,7 @@ fun AppSettingsScreen(
                     value = uiState.httpPort,
                     onValueChange = { viewModel.onHttpPortChange(it) },
                     label = { Text(stringResource(R.string.app_settings_port_label), color = TextSecondary) },
-                    placeholder = { Text(stringResource(R.string.app_settings_port_placeholder), color = TextSecondary.copy(alpha = 0.5f)) },
+                    placeholder = { Text("18790", color = TextSecondary.copy(alpha = 0.5f)) },
                     singleLine = true,
                     isError = uiState.httpPortError != null,
                     supportingText = uiState.httpPortError?.let { err -> { Text(err) } },

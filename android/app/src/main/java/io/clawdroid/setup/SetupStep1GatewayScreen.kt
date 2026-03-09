@@ -72,7 +72,7 @@ fun SetupStep1GatewayScreen(viewModel: SetupViewModel) {
             value = uiState.gatewayPort,
             onValueChange = viewModel::onGatewayPortChange,
             label = { Text(stringResource(R.string.setup_gateway_port_label), color = TextSecondary) },
-            placeholder = { Text(stringResource(R.string.setup_gateway_port_placeholder), color = TextSecondary.copy(alpha = 0.5f)) },
+            placeholder = { Text("18790", color = TextSecondary.copy(alpha = 0.5f)) },
             singleLine = true,
             isError = uiState.gatewayPortError != null,
             supportingText = {
