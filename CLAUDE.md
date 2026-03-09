@@ -47,6 +47,27 @@ Android アプリ ↔ Go バックエンド: WebSocket (`ws://127.0.0.1:18793`)
 バージョン管理: `/VERSION` ファイルにバージョン文字列を格納
 Android ツール: `tools.android.<category>.enabled` でカテゴリ単位の有効/無効切り替えが可能（10 カテゴリ: alarm, calendar, contacts, communication, media, navigation, device_control, settings, web, clipboard）
 
+## 多言語化 (i18n)
+
+Go バックエンドと Android フロントエンドの両方で英語・日本語の多言語化をサポート。
+
+### Go バックエンド (`pkg/i18n/`)
+- `i18n.T(locale, key)` / `i18n.Tf(locale, key, args...)` でメッセージカタログから翻訳を取得
+- フォールバック: 指定 locale → `"en"` → キーそのまま
+- メッセージ定義: `messages_status.go`（ステータスラベル）、`messages_config.go`（config schema ラベル）、`messages_agent.go`（警告・マイグレーション）
+- 新しい言語を追加する場合は `register("xx", map[string]string{...})` を各メッセージファイルに追加
+
+### ロケールの伝達経路
+- Android → WebSocket 接続時に `locale` クエリパラメータ → Go `metadata["locale"]` → agent loop で参照
+- Android → HTTP Gateway に `Accept-Language` ヘッダー → `handleGetSchema()` で `BuildSchema(cfg, locale)` に渡す
+
+### Android フロントエンド
+- `app/src/main/res/values/strings.xml` — 英語（デフォルト）
+- `app/src/main/res/values-ja/strings.xml` — 日本語
+- `feature/chat/src/main/res/values/strings.xml` — 英語（chat モジュール）
+- `feature/chat/src/main/res/values-ja/strings.xml` — 日本語（chat モジュール）
+- Compose UI では `stringResource(R.string.xxx)` を使用、非 Composable では `context.getString(R.string.xxx)` を使用
+
 ## GitHub テンプレート・CI
 
 ### Issue テンプレート (`.github/ISSUE_TEMPLATE/`)

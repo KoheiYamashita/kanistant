@@ -474,6 +474,14 @@ Voice mode runs a continuous conversation loop:
 
 Responses are kept short (1-3 sentences) with natural spoken language. 30-second silence timeout.
 
+### Localization
+
+ClawDroid supports English and Japanese. The app automatically detects the device language and displays UI text accordingly. The Go backend receives the locale via WebSocket query parameter and HTTP `Accept-Language` header, translating status labels, config schema labels, and warning messages.
+
+To add a new language, add translations to:
+- Go: `pkg/i18n/messages_*.go` — call `register("xx", map[string]string{...})`
+- Android: `app/src/main/res/values-xx/strings.xml` and `feature/chat/src/main/res/values-xx/strings.xml`
+
 ## Messaging Channels
 
 ClawDroid can be reached through multiple messaging platforms simultaneously.
