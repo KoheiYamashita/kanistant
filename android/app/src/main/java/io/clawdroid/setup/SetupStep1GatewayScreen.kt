@@ -59,7 +59,8 @@ fun SetupStep1GatewayScreen(viewModel: SetupViewModel) {
             color = TextPrimary,
         )
         Text(
-            "Configure the HTTP gateway that connects this app to the backend.",
+            "The gateway handles communication between this app and the Go backend running locally. " +
+                "An API key is required to authenticate requests between them.",
             style = MaterialTheme.typography.bodyMedium,
             color = TextSecondary,
         )
@@ -73,7 +74,12 @@ fun SetupStep1GatewayScreen(viewModel: SetupViewModel) {
             placeholder = { Text("18790", color = TextSecondary.copy(alpha = 0.5f)) },
             singleLine = true,
             isError = uiState.gatewayPortError != null,
-            supportingText = uiState.gatewayPortError?.let { err -> { Text(err) } },
+            supportingText = {
+                Text(
+                    uiState.gatewayPortError
+                        ?: "Local port for backend communication (default: 18790)",
+                )
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             colors = setupFieldColors(),
             modifier = Modifier.fillMaxWidth(),
@@ -84,6 +90,9 @@ fun SetupStep1GatewayScreen(viewModel: SetupViewModel) {
             onValueChange = viewModel::onGatewayApiKeyChange,
             label = { Text("API Key", color = TextSecondary) },
             singleLine = true,
+            supportingText = {
+                Text("Secures communication between this app and the backend. Use 'Generate' to create one automatically.")
+            },
             visualTransformation = if (apiKeyHidden) PasswordVisualTransformation() else VisualTransformation.None,
             trailingIcon = {
                 TextButton(onClick = { apiKeyHidden = !apiKeyHidden }) {
