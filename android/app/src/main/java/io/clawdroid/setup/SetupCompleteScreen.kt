@@ -50,7 +50,8 @@ fun SetupCompleteScreen(
         Spacer(Modifier.height(12.dp))
 
         Text(
-            "You can change these settings later from the Settings screen.",
+            "You can change these settings anytime from the Settings screen, " +
+                "where you'll also find additional options such as channel configuration and tool management.",
             style = MaterialTheme.typography.bodyMedium,
             color = TextSecondary,
         )

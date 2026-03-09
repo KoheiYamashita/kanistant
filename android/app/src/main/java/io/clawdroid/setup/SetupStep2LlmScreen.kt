@@ -48,7 +48,9 @@ fun SetupStep2LlmScreen(viewModel: SetupViewModel) {
         Text("Step 2 of 4", style = MaterialTheme.typography.labelMedium, color = TextSecondary)
         Text("LLM Settings", style = MaterialTheme.typography.headlineMedium, color = TextPrimary)
         Text(
-            "Configure the language model used by the agent.",
+            "Choose which AI model powers the agent. " +
+                "Supported providers are OpenAI, Anthropic, and Gemini. " +
+                "Enter the model name in provider/model format.",
             style = MaterialTheme.typography.bodyMedium,
             color = TextSecondary,
         )
@@ -59,7 +61,10 @@ fun SetupStep2LlmScreen(viewModel: SetupViewModel) {
             value = uiState.llmModel,
             onValueChange = viewModel::onLlmModelChange,
             label = { Text("Model", color = TextSecondary) },
-            placeholder = { Text("e.g. openai/gpt-4o", color = TextSecondary.copy(alpha = 0.5f)) },
+            placeholder = { Text("provider/model", color = TextSecondary.copy(alpha = 0.5f)) },
+            supportingText = {
+                Text("Format: provider/model (e.g. openai/gpt-5, anthropic/claude-sonnet-4-6, gemini/gemini-3.1-flash)")
+            },
             singleLine = true,
             colors = setupFieldColors(),
             modifier = Modifier.fillMaxWidth(),
@@ -69,6 +74,9 @@ fun SetupStep2LlmScreen(viewModel: SetupViewModel) {
             value = uiState.llmApiKey,
             onValueChange = viewModel::onLlmApiKeyChange,
             label = { Text("API Key", color = TextSecondary) },
+            supportingText = {
+                Text("API key from your LLM provider (OpenAI, Anthropic, or Gemini)")
+            },
             singleLine = true,
             visualTransformation = if (apiKeyHidden) PasswordVisualTransformation() else VisualTransformation.None,
             trailingIcon = {
@@ -88,7 +96,9 @@ fun SetupStep2LlmScreen(viewModel: SetupViewModel) {
             value = uiState.llmBaseUrl,
             onValueChange = viewModel::onLlmBaseUrlChange,
             label = { Text("Base URL", color = TextSecondary) },
-            placeholder = { Text("https://openrouter.ai/api/v1", color = TextSecondary.copy(alpha = 0.5f)) },
+            supportingText = {
+                Text("Custom API endpoint. Leave empty to use the provider's default.")
+            },
             singleLine = true,
             colors = setupFieldColors(),
             modifier = Modifier.fillMaxWidth(),

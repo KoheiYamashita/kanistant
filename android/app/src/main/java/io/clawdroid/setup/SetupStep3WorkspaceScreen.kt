@@ -62,7 +62,8 @@ fun SetupStep3WorkspaceScreen(viewModel: SetupViewModel) {
         Text("Step 3 of 4", style = MaterialTheme.typography.labelMedium, color = TextSecondary)
         Text("Workspace & Data", style = MaterialTheme.typography.headlineMedium, color = TextPrimary)
         Text(
-            "Set the workspace and data directories used by the agent.",
+            "The workspace is where the agent reads and writes your files. " +
+                "The data directory stores internal data such as memory and logs.",
             style = MaterialTheme.typography.bodyMedium,
             color = TextSecondary,
         )
@@ -74,6 +75,7 @@ fun SetupStep3WorkspaceScreen(viewModel: SetupViewModel) {
             onValueChange = viewModel::onWorkspaceChange,
             label = "Workspace",
             placeholder = "~/.clawdroid/workspace",
+            supportingText = "Directory where the agent reads and writes files",
             onBrowse = { workspacePicker.launch(null) },
         )
 
@@ -82,6 +84,7 @@ fun SetupStep3WorkspaceScreen(viewModel: SetupViewModel) {
             onValueChange = viewModel::onDataDirChange,
             label = "Data Directory",
             placeholder = "~/.clawdroid/data",
+            supportingText = "Directory for internal data such as memory and logs",
             onBrowse = { dataDirPicker.launch(null) },
         )
 
@@ -113,6 +116,7 @@ private fun DirectoryField(
     onValueChange: (String) -> Unit,
     label: String,
     placeholder: String,
+    supportingText: String = "",
     onBrowse: () -> Unit,
 ) {
     OutlinedTextField(
@@ -120,6 +124,11 @@ private fun DirectoryField(
         onValueChange = onValueChange,
         label = { Text(label, color = TextSecondary) },
         placeholder = { Text(placeholder, color = TextSecondary.copy(alpha = 0.5f)) },
+        supportingText = if (supportingText.isNotEmpty()) {
+            { Text(supportingText) }
+        } else {
+            null
+        },
         singleLine = true,
         trailingIcon = {
             IconButton(
