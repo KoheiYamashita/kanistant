@@ -473,7 +473,7 @@ func (al *AgentLoop) processMessage(ctx context.Context, msg bus.InboundMessage)
 			inputMode = mode
 		}
 		if l, ok := msg.Metadata["locale"]; ok && l != "" {
-			locale = l
+			locale = i18n.NormalizeLocale(l)
 		}
 	}
 
