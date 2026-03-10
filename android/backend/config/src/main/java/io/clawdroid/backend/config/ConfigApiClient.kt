@@ -18,9 +18,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import android.content.Context
 import java.io.Closeable
 import java.io.IOException
-import java.util.Locale
 
 @Serializable
 data class ConfigSchema(val sections: List<SchemaSection>)
@@ -48,7 +48,7 @@ data class SaveConfigResult(
 
 class AuthException(message: String) : IOException(message)
 
-class ConfigApiClient(private val settingsStore: GatewaySettingsStore) : Closeable {
+class ConfigApiClient(private val settingsStore: GatewaySettingsStore, private val context: Context) : Closeable {
     private val baseUrl: String
         get() = settingsStore.settings.value.httpBaseUrl
 
@@ -64,7 +64,7 @@ class ConfigApiClient(private val settingsStore: GatewaySettingsStore) : Closeab
     suspend fun getSchema(): ConfigSchema {
         return client.get("$baseUrl/api/config/schema") {
             if (apiKey.isNotEmpty()) header("Authorization", "Bearer $apiKey")
-            header("Accept-Language", Locale.getDefault().language)
+            header("Accept-Language", context.resources.configuration.locales[0].language)
         }.ensureSuccess().body()
     }
 

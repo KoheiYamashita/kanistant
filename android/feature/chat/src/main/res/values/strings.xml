@@ -21,4 +21,26 @@
     <string name="settings_voice_label">Voice</string>
     <string name="settings_open">Open</string>
     <string name="btn_back">Back</string>
+
+    <!-- Voice Mode -->
+    <string name="voice_close">Close</string>
+    <string name="voice_camera_on">Turn on camera</string>
+    <string name="voice_camera_off">Turn off camera</string>
+    <string name="voice_listening">Listening…</string>
+    <string name="voice_paused">Paused</string>
+    <string name="voice_sending">Sending…</string>
+    <string name="voice_thinking">Thinking…</string>
+    <string name="voice_speaking">Speaking…</string>
+    <string name="voice_error">Error</string>
+
+    <!-- Message Input -->
+    <string name="input_camera">Camera</string>
+    <string name="input_gallery">Gallery</string>
+    <string name="input_voice">Voice</string>
+    <string name="input_send">Send</string>
+    <string name="input_placeholder">Message…</string>
+
+    <!-- Chat Screen -->
+    <string name="chat_title">ClawDroid</string>
+    <string name="chat_settings">Settings</string>
 </resources>

@@ -35,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.clawdroid.core.ui.theme.DeepBlack
 import io.clawdroid.core.ui.theme.GlassBorder
@@ -58,7 +59,7 @@ fun ConfigSectionListScreen(
             containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
-                    title = { Text("Backend Config") },
+                    title = { Text(stringResource(R.string.config_backend_config)) },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
                     ),
@@ -66,7 +67,7 @@ fun ConfigSectionListScreen(
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 painter = painterResource(LucideR.drawable.lucide_ic_arrow_left),
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.config_back),
                                 tint = TextSecondary,
                             )
                         }
@@ -107,7 +108,7 @@ fun ConfigSectionListScreen(
                                     contentColor = DeepBlack,
                                 ),
                             ) {
-                                Text("Retry")
+                                Text(stringResource(R.string.config_retry))
                             }
                         }
                     }
@@ -134,7 +135,7 @@ fun ConfigSectionListScreen(
                                     contentColor = DeepBlack,
                                 ),
                             ) {
-                                Text("Connection Settings")
+                                Text(stringResource(R.string.config_connection_settings))
                             }
                             Spacer(Modifier.height(8.dp))
                             Button(
@@ -144,7 +145,7 @@ fun ConfigSectionListScreen(
                                     contentColor = NeonCyan,
                                 ),
                             ) {
-                                Text("Retry")
+                                Text(stringResource(R.string.config_retry))
                             }
                         }
                     }
@@ -193,14 +194,14 @@ private fun SectionCard(
                 color = TextPrimary,
             )
             Text(
-                "${section.fieldCount} fields",
+                stringResource(R.string.config_fields_count, section.fieldCount),
                 style = MaterialTheme.typography.bodySmall,
                 color = TextSecondary,
             )
         }
         Icon(
             painter = painterResource(LucideR.drawable.lucide_ic_chevron_right),
-            contentDescription = "Open",
+            contentDescription = stringResource(R.string.config_open),
             tint = TextSecondary,
         )
     }

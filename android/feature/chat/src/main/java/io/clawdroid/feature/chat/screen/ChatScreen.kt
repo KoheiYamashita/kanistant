@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.FileProvider
 import io.clawdroid.core.domain.model.ImageAttachment
 import io.clawdroid.core.ui.theme.DeepBlack
@@ -44,6 +45,7 @@ import io.clawdroid.core.ui.theme.GradientPurple
 import io.clawdroid.core.ui.theme.TextSecondary
 import io.clawdroid.feature.chat.ChatEvent
 import io.clawdroid.feature.chat.ChatViewModel
+import io.clawdroid.feature.chat.R
 import com.composables.icons.lucide.R as LucideR
 import io.clawdroid.feature.chat.component.ConnectionBanner
 import io.clawdroid.feature.chat.component.ImagePreviewRow
@@ -227,7 +229,7 @@ fun ChatScreen(
             containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
-                    title = { Text("ClawDroid") },
+                    title = { Text(stringResource(R.string.chat_title)) },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent
                     ),
@@ -235,7 +237,7 @@ fun ChatScreen(
                         IconButton(onClick = onNavigateToSettings) {
                             Icon(
                                 painter = painterResource(LucideR.drawable.lucide_ic_settings),
-                                contentDescription = "Settings",
+                                contentDescription = stringResource(R.string.chat_settings),
                                 tint = TextSecondary
                             )
                         }

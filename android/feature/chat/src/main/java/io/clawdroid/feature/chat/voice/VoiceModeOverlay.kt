@@ -36,10 +36,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import io.clawdroid.core.domain.model.VoicePhase
+import io.clawdroid.feature.chat.R
 import io.clawdroid.core.ui.theme.DeepBlack
 import io.clawdroid.core.ui.theme.GradientCyan
 import io.clawdroid.core.ui.theme.GradientPurple
@@ -96,7 +98,7 @@ fun VoiceModeOverlay(
             ) {
                 Icon(
                     painter = painterResource(LucideR.drawable.lucide_ic_x),
-                    contentDescription = "Close",
+                    contentDescription = stringResource(R.string.voice_close),
                     modifier = Modifier.size(28.dp),
                     tint = TextSecondary
                 )
@@ -199,7 +201,7 @@ fun VoiceModeOverlay(
                             if (state.isCameraActive) LucideR.drawable.lucide_ic_camera_off
                             else LucideR.drawable.lucide_ic_camera
                         ),
-                        contentDescription = if (state.isCameraActive) "Turn off camera" else "Turn on camera",
+                        contentDescription = stringResource(if (state.isCameraActive) R.string.voice_camera_off else R.string.voice_camera_on),
                         modifier = Modifier.size(28.dp),
                         tint = if (state.isCameraActive) GradientCyan else TextSecondary
                     )
@@ -209,12 +211,13 @@ fun VoiceModeOverlay(
     }
 }
 
+@Composable
 private fun phaseLabel(phase: VoicePhase): String = when (phase) {
     VoicePhase.IDLE -> ""
-    VoicePhase.LISTENING -> "Listening..."
-    VoicePhase.PAUSED -> "Paused"
-    VoicePhase.SENDING -> "Sending..."
-    VoicePhase.THINKING -> "Thinking..."
-    VoicePhase.SPEAKING -> "Speaking..."
-    VoicePhase.ERROR -> "Error"
+    VoicePhase.LISTENING -> stringResource(R.string.voice_listening)
+    VoicePhase.PAUSED -> stringResource(R.string.voice_paused)
+    VoicePhase.SENDING -> stringResource(R.string.voice_sending)
+    VoicePhase.THINKING -> stringResource(R.string.voice_thinking)
+    VoicePhase.SPEAKING -> stringResource(R.string.voice_speaking)
+    VoicePhase.ERROR -> stringResource(R.string.voice_error)
 }

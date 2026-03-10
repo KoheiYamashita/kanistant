@@ -21,4 +21,26 @@
     <string name="settings_voice_label">音声</string>
     <string name="settings_open">開く</string>
     <string name="btn_back">戻る</string>
+
+    <!-- Voice Mode -->
+    <string name="voice_close">閉じる</string>
+    <string name="voice_camera_on">カメラをオン</string>
+    <string name="voice_camera_off">カメラをオフ</string>
+    <string name="voice_listening">聞いています…</string>
+    <string name="voice_paused">一時停止</string>
+    <string name="voice_sending">送信中…</string>
+    <string name="voice_thinking">思考中…</string>
+    <string name="voice_speaking">話しています…</string>
+    <string name="voice_error">エラー</string>
+
+    <!-- Message Input -->
+    <string name="input_camera">カメラ</string>
+    <string name="input_gallery">ギャラリー</string>
+    <string name="input_voice">音声</string>
+    <string name="input_send">送信</string>
+    <string name="input_placeholder">メッセージ…</string>
+
+    <!-- Chat Screen -->
+    <string name="chat_title">ClawDroid</string>
+    <string name="chat_settings">設定</string>
 </resources>

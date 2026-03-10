@@ -115,7 +115,7 @@ class AssistantService : LifecycleService(), SavedStateRegistryOwner {
 
         serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-        connection = AssistantConnectionImpl(httpClient)
+        connection = AssistantConnectionImpl(httpClient, applicationContext)
 
         toolRequestHandler = ToolRequestHandler(
             context = applicationContext,
@@ -345,15 +345,11 @@ class AssistantService : LifecycleService(), SavedStateRegistryOwner {
                             ) {
                                 Column(modifier = Modifier.padding(24.dp)) {
                                     Text(
-                                        text = "画面キャプチャの設定",
+                                        text = getString(io.clawdroid.R.string.assistant_accessibility_title),
                                         style = MaterialTheme.typography.headlineSmall
                                     )
                                     Text(
-                                        text = "画面キャプチャを使用するには、ユーザー補助の設定で" +
-                                            " ClawDroid を有効にしてください。\n\n" +
-                                            "有効にできない場合は、アプリ情報から" +
-                                            "「制限付き設定を許可」を実行してから" +
-                                            "再度お試しください。",
+                                        text = getString(io.clawdroid.R.string.assistant_accessibility_body),
                                         style = MaterialTheme.typography.bodyMedium,
                                         modifier = Modifier.padding(top = 16.dp)
                                     )
@@ -364,7 +360,7 @@ class AssistantService : LifecycleService(), SavedStateRegistryOwner {
                                         horizontalArrangement = Arrangement.End
                                     ) {
                                         TextButton(onClick = { showAccessibilityGuide = false }) {
-                                            Text("キャンセル")
+                                            Text(getString(io.clawdroid.R.string.action_cancel))
                                         }
                                         TextButton(onClick = {
                                             showAccessibilityGuide = false
@@ -372,7 +368,7 @@ class AssistantService : LifecycleService(), SavedStateRegistryOwner {
                                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                             startActivity(intent)
                                         }) {
-                                            Text("設定を開く")
+                                            Text(getString(io.clawdroid.R.string.assistant_accessibility_open_settings))
                                         }
                                     }
                                 }
@@ -414,7 +410,7 @@ class AssistantService : LifecycleService(), SavedStateRegistryOwner {
         return NotificationCompat.Builder(this, NotificationHelper.ASSISTANT_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("ClawDroid Assistant")
-            .setContentText("Listening...")
+            .setContentText(getString(io.clawdroid.R.string.assistant_notification_listening))
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
             .build()

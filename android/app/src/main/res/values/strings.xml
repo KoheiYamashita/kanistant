@@ -63,4 +63,18 @@
     <string name="notification_channel_gateway">Gateway</string>
     <string name="notification_channel_gateway_desc">Gateway backend service</string>
     <string name="notification_title">ClawDroid</string>
+
+    <!-- Common actions -->
+    <string name="action_cancel">Cancel</string>
+
+    <!-- Accessibility Guide -->
+    <string name="assistant_accessibility_title">Screen Capture Setup</string>
+    <string name="assistant_accessibility_body">To use screen capture, enable ClawDroid in Accessibility settings.\n\nIf you cannot enable it, go to App Info and select \"Allow restricted settings\", then try again.</string>
+    <string name="assistant_accessibility_open_settings">Open Settings</string>
+
+    <!-- Assistant Notification -->
+    <string name="assistant_notification_listening">Listening…</string>
+
+    <!-- Calendar Picker -->
+    <string name="calendar_picker_title">Select Calendar</string>
 </resources>

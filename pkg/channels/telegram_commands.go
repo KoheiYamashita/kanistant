@@ -2,10 +2,10 @@ package channels
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/KarakuriAgent/clawdroid/pkg/config"
+	"github.com/KarakuriAgent/clawdroid/pkg/i18n"
 	"github.com/mymmrac/telego"
 )
 
@@ -36,14 +36,10 @@ func commandArgs(text string) string {
 	return strings.TrimSpace(parts[1])
 }
 func (c *cmd) Help(ctx context.Context, message telego.Message) error {
-	msg := `/start - Start the bot
-/help - Show this help message
-/show [model|channel] - Show current configuration
-/list [models|channels] - List available options
-	`
+	locale := localeFromMessage(message)
 	_, err := c.bot.SendMessage(ctx, &telego.SendMessageParams{
 		ChatID: telego.ChatID{ID: message.Chat.ID},
-		Text:   msg,
+		Text:   i18n.T(locale, "cmd.help"),
 		ReplyParameters: &telego.ReplyParameters{
 			MessageID: message.MessageID,
 		},
@@ -52,9 +48,10 @@ func (c *cmd) Help(ctx context.Context, message telego.Message) error {
 }
 
 func (c *cmd) Start(ctx context.Context, message telego.Message) error {
+	locale := localeFromMessage(message)
 	_, err := c.bot.SendMessage(ctx, &telego.SendMessageParams{
 		ChatID: telego.ChatID{ID: message.Chat.ID},
-		Text:   "Hello! I am ClawDroid 🦞",
+		Text:   i18n.T(locale, "cmd.start"),
 		ReplyParameters: &telego.ReplyParameters{
 			MessageID: message.MessageID,
 		},
@@ -63,11 +60,12 @@ func (c *cmd) Start(ctx context.Context, message telego.Message) error {
 }
 
 func (c *cmd) Show(ctx context.Context, message telego.Message) error {
+	locale := localeFromMessage(message)
 	args := commandArgs(message.Text)
 	if args == "" {
 		_, err := c.bot.SendMessage(ctx, &telego.SendMessageParams{
 			ChatID: telego.ChatID{ID: message.Chat.ID},
-			Text:   "Usage: /show [model|channel]",
+			Text:   i18n.T(locale, "cmd.show.usage"),
 			ReplyParameters: &telego.ReplyParameters{
 				MessageID: message.MessageID,
 			},
@@ -78,12 +76,11 @@ func (c *cmd) Show(ctx context.Context, message telego.Message) error {
 	var response string
 	switch args {
 	case "model":
-		response = fmt.Sprintf("Current Model: %s",
-			c.config.LLM.Model)
+		response = i18n.Tf(locale, "cmd.show.model", c.config.LLM.Model)
 	case "channel":
-		response = "Current Channel: telegram"
+		response = i18n.T(locale, "cmd.show.channel")
 	default:
-		response = fmt.Sprintf("Unknown parameter: %s. Try 'model' or 'channel'.", args)
+		response = i18n.Tf(locale, "cmd.show.unknown", args)
 	}
 
 	_, err := c.bot.SendMessage(ctx, &telego.SendMessageParams{
@@ -96,11 +93,12 @@ func (c *cmd) Show(ctx context.Context, message telego.Message) error {
 	return err
 }
 func (c *cmd) List(ctx context.Context, message telego.Message) error {
+	locale := localeFromMessage(message)
 	args := commandArgs(message.Text)
 	if args == "" {
 		_, err := c.bot.SendMessage(ctx, &telego.SendMessageParams{
 			ChatID: telego.ChatID{ID: message.Chat.ID},
-			Text:   "Usage: /list [models|channels]",
+			Text:   i18n.T(locale, "cmd.list.usage"),
 			ReplyParameters: &telego.ReplyParameters{
 				MessageID: message.MessageID,
 			},
@@ -111,8 +109,7 @@ func (c *cmd) List(ctx context.Context, message telego.Message) error {
 	var response string
 	switch args {
 	case "models":
-		response = fmt.Sprintf("Configured Model: %s\n\nTo change models, update config.json",
-			c.config.LLM.Model)
+		response = i18n.Tf(locale, "cmd.list.models", c.config.LLM.Model)
 
 	case "channels":
 		var enabled []string
@@ -131,10 +128,10 @@ func (c *cmd) List(ctx context.Context, message telego.Message) error {
 		if c.config.Channels.LINE.Enabled {
 			enabled = append(enabled, "line")
 		}
-		response = fmt.Sprintf("Enabled Channels:\n- %s", strings.Join(enabled, "\n- "))
+		response = i18n.Tf(locale, "cmd.list.channels", strings.Join(enabled, "\n- "))
 
 	default:
-		response = fmt.Sprintf("Unknown parameter: %s. Try 'models' or 'channels'.", args)
+		response = i18n.Tf(locale, "cmd.list.unknown", args)
 	}
 
 	_, err := c.bot.SendMessage(ctx, &telego.SendMessageParams{
@@ -145,4 +142,11 @@ func (c *cmd) List(ctx context.Context, message telego.Message) error {
 		},
 	})
 	return err
+}
+
+func localeFromMessage(message telego.Message) string {
+	if message.From != nil {
+		return i18n.NormalizeLocale(message.From.LanguageCode)
+	}
+	return "en"
 }

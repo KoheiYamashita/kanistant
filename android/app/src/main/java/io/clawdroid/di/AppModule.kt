@@ -81,7 +81,7 @@ val appModule = module {
         val clientId = prefs.getString("client_id", null) ?: UUID.randomUUID().toString().also {
             prefs.edit { putString("client_id", it) }
         }
-        WebSocketClient(get(), get(), clientId)
+        WebSocketClient(get(), get(), clientId, context = androidContext())
     }
 
     // ImageFileStorage

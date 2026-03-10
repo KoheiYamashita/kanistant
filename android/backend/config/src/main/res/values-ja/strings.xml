@@ -1,0 +1,22 @@
+<resources>
+    <string name="config_save">保存</string>
+    <string name="config_show">表示</string>
+    <string name="config_hide">非表示</string>
+    <string name="config_comma_separated">カンマ区切りの値</string>
+    <string name="config_internal_storage_only">内部ストレージのみ</string>
+    <string name="config_internal_storage_saf">SAFピッカーは内部ストレージのみ</string>
+    <string name="config_select_calendar">カレンダーを選択</string>
+    <string name="config_pick_each_time">毎回選択する</string>
+    <string name="config_cancel">キャンセル</string>
+    <string name="config_back">戻る</string>
+    <string name="config_browse">参照</string>
+    <string name="config_saved">保存しました。</string>
+    <string name="config_saved_restarting">保存しました。サーバーを再起動中…</string>
+    <string name="config_error_prefix">エラー: </string>
+    <string name="config_backend_config">バックエンド設定</string>
+    <string name="config_retry">リトライ</string>
+    <string name="config_connection_settings">接続設定</string>
+    <string name="config_open">開く</string>
+    <string name="config_fields_count">%1$d 個の項目</string>
+    <string name="config_select">選択</string>
+</resources>

@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.clawdroid.core.ui.theme.DeepBlack
 import io.clawdroid.core.ui.theme.GlassBorder
@@ -29,6 +30,7 @@ import io.clawdroid.core.ui.theme.NeonCyan
 import io.clawdroid.core.ui.theme.TextPrimary
 import io.clawdroid.core.ui.theme.TextSecondary
 import io.clawdroid.core.ui.theme.TextTertiary
+import io.clawdroid.feature.chat.R
 import com.composables.icons.lucide.R as LucideR
 
 @Composable
@@ -60,21 +62,21 @@ fun MessageInput(
         IconButton(onClick = onCameraClick) {
             Icon(
                 painter = painterResource(LucideR.drawable.lucide_ic_camera),
-                contentDescription = "Camera",
+                contentDescription = stringResource(R.string.input_camera),
                 tint = TextSecondary
             )
         }
         IconButton(onClick = onGalleryClick) {
             Icon(
                 painter = painterResource(LucideR.drawable.lucide_ic_image),
-                contentDescription = "Gallery",
+                contentDescription = stringResource(R.string.input_gallery),
                 tint = TextSecondary
             )
         }
         IconButton(onClick = onMicClick) {
             Icon(
                 painter = painterResource(LucideR.drawable.lucide_ic_mic),
-                contentDescription = "Voice",
+                contentDescription = stringResource(R.string.input_voice),
                 tint = TextSecondary
             )
         }
@@ -82,7 +84,7 @@ fun MessageInput(
             value = text,
             onValueChange = onTextChanged,
             modifier = Modifier.weight(1f),
-            placeholder = { Text("Message...", color = TextTertiary) },
+            placeholder = { Text(stringResource(R.string.input_placeholder), color = TextTertiary) },
             maxLines = 4,
             shape = RoundedCornerShape(24.dp),
             colors = OutlinedTextFieldDefaults.colors(
@@ -106,7 +108,7 @@ fun MessageInput(
         ) {
             Icon(
                 painter = painterResource(LucideR.drawable.lucide_ic_send_horizontal),
-                contentDescription = "Send"
+                contentDescription = stringResource(R.string.input_send)
             )
         }
     }

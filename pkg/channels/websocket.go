@@ -12,6 +12,7 @@ import (
 	"github.com/KarakuriAgent/clawdroid/pkg/broadcast"
 	"github.com/KarakuriAgent/clawdroid/pkg/bus"
 	"github.com/KarakuriAgent/clawdroid/pkg/config"
+	"github.com/KarakuriAgent/clawdroid/pkg/i18n"
 	"github.com/KarakuriAgent/clawdroid/pkg/logger"
 	"github.com/KarakuriAgent/clawdroid/pkg/tools"
 	"github.com/google/uuid"
@@ -254,7 +255,7 @@ func (c *WebSocketChannel) handleWS(w http.ResponseWriter, r *http.Request) {
 	if c.configPath != "" {
 		if _, err := os.Stat(c.configPath); os.IsNotExist(err) {
 			setupMsg := wsOutgoing{
-				Content: "Configuration required",
+				Content: i18n.T(locale, "channel.config_required"),
 				Type:    "setup_required",
 			}
 			if data, err := json.Marshal(setupMsg); err == nil {

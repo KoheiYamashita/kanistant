@@ -17,6 +17,7 @@ import (
 
 	"github.com/KarakuriAgent/clawdroid/pkg/bus"
 	"github.com/KarakuriAgent/clawdroid/pkg/config"
+	"github.com/KarakuriAgent/clawdroid/pkg/i18n"
 	"github.com/KarakuriAgent/clawdroid/pkg/logger"
 	"github.com/KarakuriAgent/clawdroid/pkg/utils"
 )
@@ -307,7 +308,9 @@ func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Mes
 	_, thinkCancel := context.WithTimeout(ctx, 5*time.Minute)
 	c.stopThinking.Store(chatIDStr, &thinkingCancel{fn: thinkCancel})
 
-	pMsg, err := c.bot.SendMessage(ctx, tu.Message(tu.ID(chatID), "Thinking... 💭"))
+	locale := localeFromMessage(*message)
+
+	pMsg, err := c.bot.SendMessage(ctx, tu.Message(tu.ID(chatID), i18n.T(locale, "channel.thinking")))
 	if err == nil {
 		pID := pMsg.MessageID
 		c.placeholders.Store(chatIDStr, pID)
@@ -324,6 +327,7 @@ func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Mes
 		"first_name":  user.FirstName,
 		"sender_name": senderName,
 		"is_group":    fmt.Sprintf("%t", message.Chat.Type != "private"),
+		"locale":      locale,
 	}
 
 	c.HandleMessage(fmt.Sprintf("%d", user.ID), fmt.Sprintf("%d", chatID), content, mediaPaths, metadata)

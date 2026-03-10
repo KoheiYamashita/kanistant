@@ -1,0 +1,22 @@
+<resources>
+    <string name="config_save">Save</string>
+    <string name="config_show">Show</string>
+    <string name="config_hide">Hide</string>
+    <string name="config_comma_separated">Comma-separated values</string>
+    <string name="config_internal_storage_only">Internal storage only</string>
+    <string name="config_internal_storage_saf">Internal storage only for SAF picker</string>
+    <string name="config_select_calendar">Select Calendar</string>
+    <string name="config_pick_each_time">Pick each time</string>
+    <string name="config_cancel">Cancel</string>
+    <string name="config_back">Back</string>
+    <string name="config_browse">Browse</string>
+    <string name="config_saved">Saved.</string>
+    <string name="config_saved_restarting">Saved. Server restarting…</string>
+    <string name="config_error_prefix">Error: </string>
+    <string name="config_backend_config">Backend Config</string>
+    <string name="config_retry">Retry</string>
+    <string name="config_connection_settings">Connection Settings</string>
+    <string name="config_open">Open</string>
+    <string name="config_fields_count">%1$d fields</string>
+    <string name="config_select">Select</string>
+</resources>

@@ -455,21 +455,6 @@ func (al *AgentLoop) processMessage(ctx context.Context, msg bus.InboundMessage)
 		return al.processSystemMessage(ctx, msg)
 	}
 
-	// Check request rate limit
-	if err := al.rateLimiter.checkRequest(); err != nil {
-		logger.WarnCF("agent", "Request rate limited",
-			map[string]interface{}{
-				"channel":   msg.Channel,
-				"sender_id": msg.SenderID,
-			})
-		return fmt.Sprintf("Rate limited: %v. Please try again later.", err), nil
-	}
-
-	// Check for commands
-	if response, handled := al.handleCommand(ctx, msg); handled {
-		return response, nil
-	}
-
 	// Extract input_mode and locale from metadata
 	inputMode := "text"
 	locale := "en"
@@ -480,6 +465,21 @@ func (al *AgentLoop) processMessage(ctx context.Context, msg bus.InboundMessage)
 		if l, ok := msg.Metadata["locale"]; ok && l != "" {
 			locale = i18n.NormalizeLocale(l)
 		}
+	}
+
+	// Check request rate limit
+	if err := al.rateLimiter.checkRequest(); err != nil {
+		logger.WarnCF("agent", "Request rate limited",
+			map[string]interface{}{
+				"channel":   msg.Channel,
+				"sender_id": msg.SenderID,
+			})
+		return i18n.Tf(locale, "agent.rate_limited", err), nil
+	}
+
+	// Check for commands
+	if response, handled := al.handleCommand(ctx, msg, locale); handled {
+		return response, nil
 	}
 
 	// Send migration notice once on first message
@@ -937,7 +937,7 @@ func (al *AgentLoop) runLLMIteration(ctx context.Context, messages []providers.M
 					})
 				toolResultMsg := providers.Message{
 					Role:       "tool",
-					Content:    fmt.Sprintf("Rate limited: %v", err),
+					Content:    i18n.Tf(locale, "agent.rate_limited_tool", err),
 					ToolCallID: tc.ID,
 				}
 				messages = append(messages, toolResultMsg)
@@ -1361,7 +1361,7 @@ func (al *AgentLoop) estimateTokens(messages []providers.Message) int {
 	return totalChars * 2 / 5
 }
 
-func (al *AgentLoop) handleCommand(ctx context.Context, msg bus.InboundMessage) (string, bool) {
+func (al *AgentLoop) handleCommand(ctx context.Context, msg bus.InboundMessage, locale string) (string, bool) {
 	content := strings.TrimSpace(msg.Content)
 	if !strings.HasPrefix(content, "/") {
 		return "", false
@@ -1378,41 +1378,40 @@ func (al *AgentLoop) handleCommand(ctx context.Context, msg bus.InboundMessage) 
 	switch cmd {
 	case "/show":
 		if len(args) < 1 {
-			return "Usage: /show [model|channel]", true
+			return i18n.T(locale, "cmd.show.usage"), true
 		}
 		switch args[0] {
 		case "model":
-			return fmt.Sprintf("Current model: %s", al.model), true
+			return i18n.Tf(locale, "agent.cmd.show.model", al.model), true
 		case "channel":
-			return fmt.Sprintf("Current channel: %s", msg.Channel), true
+			return i18n.Tf(locale, "agent.cmd.show.channel", msg.Channel), true
 		default:
-			return fmt.Sprintf("Unknown show target: %s", args[0]), true
+			return i18n.Tf(locale, "agent.cmd.show.unknown", args[0]), true
 		}
 
 	case "/list":
 		if len(args) < 1 {
-			return "Usage: /list [models|channels]", true
+			return i18n.T(locale, "cmd.list.usage"), true
 		}
 		switch args[0] {
 		case "models":
-			// TODO: Fetch available models dynamically if possible
-			return "Available models: glm-4.7, claude-3-5-sonnet, gpt-4o (configured in config.json/env)", true
+			return i18n.T(locale, "agent.cmd.list.models"), true
 		case "channels":
 			if al.channelManager == nil {
-				return "Channel manager not initialized", true
+				return i18n.T(locale, "agent.cmd.channel_mgr_error"), true
 			}
 			channels := al.channelManager.GetEnabledChannels()
 			if len(channels) == 0 {
-				return "No channels enabled", true
+				return i18n.T(locale, "agent.cmd.list.no_channels"), true
 			}
-			return fmt.Sprintf("Enabled channels: %s", strings.Join(channels, ", ")), true
+			return i18n.Tf(locale, "agent.cmd.list.channels", strings.Join(channels, ", ")), true
 		default:
-			return fmt.Sprintf("Unknown list target: %s", args[0]), true
+			return i18n.Tf(locale, "agent.cmd.list.unknown", args[0]), true
 		}
 
 	case "/switch":
 		if len(args) < 3 || args[1] != "to" {
-			return "Usage: /switch [model|channel] to <name>", true
+			return i18n.T(locale, "agent.cmd.switch.usage"), true
 		}
 		target := args[0]
 		value := args[2]
@@ -1421,23 +1420,17 @@ func (al *AgentLoop) handleCommand(ctx context.Context, msg bus.InboundMessage) 
 		case "model":
 			oldModel := al.model
 			al.model = value
-			return fmt.Sprintf("Switched model from %s to %s", oldModel, value), true
+			return i18n.Tf(locale, "agent.cmd.switch.model", oldModel, value), true
 		case "channel":
-			// This changes the 'default' channel for some operations, or effectively redirects output?
-			// For now, let's just validate if the channel exists
 			if al.channelManager == nil {
-				return "Channel manager not initialized", true
+				return i18n.T(locale, "agent.cmd.channel_mgr_error"), true
 			}
 			if _, exists := al.channelManager.GetChannel(value); !exists && value != "cli" {
-				return fmt.Sprintf("Channel '%s' not found or not enabled", value), true
+				return i18n.Tf(locale, "agent.cmd.switch.not_found", value), true
 			}
-
-			// If message came from CLI, maybe we want to redirect CLI output to this channel?
-			// That would require state persistence about "redirected channel"
-			// For now, just acknowledged.
-			return fmt.Sprintf("Switched target channel to %s (Note: this currently only validates existence)", value), true
+			return i18n.Tf(locale, "agent.cmd.switch.channel", value), true
 		default:
-			return fmt.Sprintf("Unknown switch target: %s", target), true
+			return i18n.Tf(locale, "agent.cmd.switch.unknown", target), true
 		}
 	}
 

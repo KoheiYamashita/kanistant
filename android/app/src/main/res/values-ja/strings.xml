@@ -63,4 +63,18 @@
     <string name="notification_channel_gateway">ゲートウェイ</string>
     <string name="notification_channel_gateway_desc">ゲートウェイバックエンドサービス</string>
     <string name="notification_title">ClawDroid</string>
+
+    <!-- Common actions -->
+    <string name="action_cancel">キャンセル</string>
+
+    <!-- Accessibility Guide -->
+    <string name="assistant_accessibility_title">画面キャプチャの設定</string>
+    <string name="assistant_accessibility_body">画面キャプチャを使用するには、ユーザー補助の設定で ClawDroid を有効にしてください。\n\n有効にできない場合は、アプリ情報から「制限付き設定を許可」を実行してから再度お試しください。</string>
+    <string name="assistant_accessibility_open_settings">設定を開く</string>
+
+    <!-- Assistant Notification -->
+    <string name="assistant_notification_listening">聞いています…</string>
+
+    <!-- Calendar Picker -->
+    <string name="calendar_picker_title">カレンダーを選択</string>
 </resources>

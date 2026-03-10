@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.clawdroid.core.ui.theme.ClawDroidTheme
 import io.clawdroid.core.ui.theme.GlassBorder
@@ -94,7 +95,7 @@ class CalendarPickerActivity : ComponentActivity() {
             onDismissRequest = onCancel,
             containerColor = DarkCard,
             title = {
-                Text("Select Calendar", color = NeonCyan)
+                Text(stringResource(R.string.calendar_picker_title), color = NeonCyan)
             },
             text = {
                 Surface(
@@ -126,7 +127,7 @@ class CalendarPickerActivity : ComponentActivity() {
             confirmButton = {},
             dismissButton = {
                 TextButton(onClick = onCancel) {
-                    Text("Cancel", color = TextSecondary)
+                    Text(stringResource(R.string.action_cancel), color = TextSecondary)
                 }
             },
         )
