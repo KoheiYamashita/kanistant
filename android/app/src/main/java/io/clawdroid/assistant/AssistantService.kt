@@ -115,7 +115,7 @@ class AssistantService : LifecycleService(), SavedStateRegistryOwner {
 
         serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-        connection = AssistantConnectionImpl(httpClient)
+        connection = AssistantConnectionImpl(httpClient, this)
 
         toolRequestHandler = ToolRequestHandler(
             context = applicationContext,

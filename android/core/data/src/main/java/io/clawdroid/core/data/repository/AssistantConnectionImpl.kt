@@ -1,5 +1,6 @@
 package io.clawdroid.core.data.repository
 
+import android.content.Context
 import android.util.Log
 import io.ktor.client.HttpClient
 import io.clawdroid.core.data.remote.WebSocketClient
@@ -25,12 +26,13 @@ import java.util.UUID
 typealias ToolRequestCallback = suspend (ToolRequest) -> String
 
 class AssistantConnectionImpl(
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val context: Context
 ) : AssistantConnection {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val clientId = UUID.randomUUID().toString()
-    private val wsClient = WebSocketClient(httpClient, scope, clientId, "assistant")
+    private val wsClient = WebSocketClient(httpClient, scope, clientId, "assistant", context = context)
     private val json = Json { ignoreUnknownKeys = true }
 
     private val _messages = MutableSharedFlow<AssistantMessage>(extraBufferCapacity = 64)
