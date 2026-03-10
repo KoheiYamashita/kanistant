@@ -2,7 +2,7 @@ package config
 
 // ConfigVersion is the current config schema version.
 // Increment this when adding new fields that must appear in existing config files.
-const ConfigVersion = 3
+const ConfigVersion = 4
 
 // migrateConfig runs version-based migrations on cfg.
 // Returns true if migrations were applied and config should be re-saved.
@@ -15,6 +15,7 @@ func migrateConfig(cfg *Config) bool {
 		migrateV0ToV1,
 		migrateV1ToV2,
 		migrateV2ToV3,
+		migrateV3ToV4,
 	}
 
 	for i := cfg.Version; i < ConfigVersion && i < len(migrations); i++ {
@@ -52,6 +53,15 @@ func migrateV2ToV3(cfg *Config) {
 	def.DisabledActions = nil
 
 	cfg.Tools.Android = def
+}
+
+func migrateV3ToV4(cfg *Config) {
+	// Add App/UI/Intent category toggles for core actions.
+	// Version bump + re-save writes the new fields into config.json.
+	def := DefaultAndroidToolsConfig()
+	cfg.Tools.Android.App = def.App
+	cfg.Tools.Android.UI = def.UI
+	cfg.Tools.Android.Intent = def.Intent
 }
 
 // disableActions sets action fields to false for any action name present in disabled.

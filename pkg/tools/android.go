@@ -282,7 +282,7 @@ func registerCategoryValidator(fn func(string, map[string]interface{}) (map[stri
 // isActionEnabled checks whether an action is allowed by the current config.
 func (t *AndroidTool) isActionEnabled(action string) bool {
 	cat := actionCategory(action)
-	if cat != "" && !isCategoryEnabled(t.cfg, cat) {
+	if !isCategoryEnabled(t.cfg, cat) {
 		return false
 	}
 	return !isActionDisabledByConfig(t.cfg, action)

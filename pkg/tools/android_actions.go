@@ -9,7 +9,7 @@ import (
 // androidAction describes a single action available in the android tool.
 type androidAction struct {
 	Name     string
-	Category string // "" = core (always on), "alarm", "calendar", etc.
+	Category string // "app", "ui", "intent", "alarm", "calendar", etc.
 	Desc     string
 	UIOnly   bool // restricted to non-main client types
 	Params   []androidParam
@@ -25,22 +25,22 @@ type androidParam struct {
 }
 
 // allActions defines every action the android tool supports.
-// Core actions (Category="") are always available when the tool is enabled.
+// Every action belongs to a category that can be toggled in the config.
 var allActions = []androidAction{
-	// ── Core: App Management ──
-	{Name: "search_apps", Desc: "Search installed apps by name or package name (requires query)", Params: []androidParam{
+	// ── App Management ──
+	{Name: "search_apps", Category: "app", Desc: "Search installed apps by name or package name (requires query)", Params: []androidParam{
 		{Name: "query", Type: "string", Desc: "Search query for app name or package name", Required: true},
 	}},
-	{Name: "app_info", Desc: "Get app details (requires package_name)", Params: []androidParam{
+	{Name: "app_info", Category: "app", Desc: "Get app details (requires package_name)", Params: []androidParam{
 		{Name: "package_name", Type: "string", Desc: "Android package name", Required: true},
 	}},
-	{Name: "launch_app", Desc: "Launch an app (requires package_name)", Params: []androidParam{
+	{Name: "launch_app", Category: "app", Desc: "Launch an app (requires package_name)", Params: []androidParam{
 		{Name: "package_name", Type: "string", Desc: "Android package name", Required: true},
 	}},
 
-	// ── Core: UI Interaction (UIOnly) ──
-	{Name: "screenshot", Desc: "Capture a screenshot of the current screen (no params)", UIOnly: true},
-	{Name: "get_ui_tree", Desc: "Get the accessibility UI tree (optional: resource_id, index, bounds_x/bounds_y, max_depth, max_nodes)", UIOnly: true, Params: []androidParam{
+	// ── UI Interaction (UIOnly) ──
+	{Name: "screenshot", Category: "ui", Desc: "Capture a screenshot of the current screen (no params)", UIOnly: true},
+	{Name: "get_ui_tree", Category: "ui", Desc: "Get the accessibility UI tree (optional: resource_id, index, bounds_x/bounds_y, max_depth, max_nodes)", UIOnly: true, Params: []androidParam{
 		{Name: "resource_id", Type: "string", Desc: "View resource ID to start UI tree from (e.g. com.example:id/button)"},
 		{Name: "index", Type: "integer", Desc: "Which match to use when resource_id has multiple hits (default 0)"},
 		{Name: "bounds_x", Type: "number", Desc: "X coordinate to find the containing node (alternative to resource_id)"},
@@ -48,30 +48,30 @@ var allActions = []androidAction{
 		{Name: "max_depth", Type: "integer", Desc: "Maximum traversal depth (default 15)"},
 		{Name: "max_nodes", Type: "integer", Desc: "Maximum number of nodes to output (default 300)"},
 	}},
-	{Name: "tap", Desc: "Tap a screen coordinate (requires x, y)", UIOnly: true, Params: []androidParam{
+	{Name: "tap", Category: "ui", Desc: "Tap a screen coordinate (requires x, y)", UIOnly: true, Params: []androidParam{
 		{Name: "x", Type: "number", Desc: "X coordinate", Required: true},
 		{Name: "y", Type: "number", Desc: "Y coordinate", Required: true},
 	}},
-	{Name: "swipe", Desc: "Swipe between coordinates (requires x, y, x2, y2; optional duration_ms)", UIOnly: true, Params: []androidParam{
+	{Name: "swipe", Category: "ui", Desc: "Swipe between coordinates (requires x, y, x2, y2; optional duration_ms)", UIOnly: true, Params: []androidParam{
 		{Name: "x", Type: "number", Desc: "Start X coordinate", Required: true},
 		{Name: "y", Type: "number", Desc: "Start Y coordinate", Required: true},
 		{Name: "x2", Type: "number", Desc: "End X coordinate", Required: true},
 		{Name: "y2", Type: "number", Desc: "End Y coordinate", Required: true},
 		{Name: "duration_ms", Type: "integer", Desc: "Swipe duration in milliseconds (default 300)"},
 	}},
-	{Name: "text", Desc: "Input text into the focused field (requires text)", UIOnly: true, Params: []androidParam{
+	{Name: "text", Category: "ui", Desc: "Input text into the focused field (requires text)", UIOnly: true, Params: []androidParam{
 		{Name: "text", Type: "string", Desc: "Text to input", Required: true},
 	}},
-	{Name: "keyevent", Desc: "Press a key (requires key: back/home/recents)", UIOnly: true, Params: []androidParam{
+	{Name: "keyevent", Category: "ui", Desc: "Press a key (requires key: back/home/recents)", UIOnly: true, Params: []androidParam{
 		{Name: "key", Type: "string", Desc: "Key to press", Required: true, Enum: []string{"back", "home", "recents"}},
 	}},
 
-	// ── Core: Intent ──
-	{Name: "broadcast", Desc: "Send a broadcast intent (requires intent_action; optional intent_extras)", Params: []androidParam{
+	// ── Intent ──
+	{Name: "broadcast", Category: "intent", Desc: "Send a broadcast intent (requires intent_action; optional intent_extras)", Params: []androidParam{
 		{Name: "intent_action", Type: "string", Desc: "Intent action string", Required: true},
 		{Name: "intent_extras", Type: "object", Desc: "Extra key-value pairs for broadcast"},
 	}},
-	{Name: "intent", Desc: "Start an activity via intent (requires intent_action; optional intent_data, intent_package, intent_type, intent_extras)", Params: []androidParam{
+	{Name: "intent", Category: "intent", Desc: "Start an activity via intent (requires intent_action; optional intent_data, intent_package, intent_type, intent_extras)", Params: []androidParam{
 		{Name: "intent_action", Type: "string", Desc: "Intent action string", Required: true},
 		{Name: "intent_data", Type: "string", Desc: "Intent data URI"},
 		{Name: "intent_package", Type: "string", Desc: "Target package for intent"},
@@ -251,7 +251,7 @@ func enabledActions(cfg config.AndroidToolsConfig, clientType string) []androidA
 			continue
 		}
 		// Filter by category config
-		if a.Category != "" && !isCategoryEnabled(cfg, a.Category) {
+		if !isCategoryEnabled(cfg, a.Category) {
 			continue
 		}
 		// Filter by individual action toggle
@@ -264,9 +264,33 @@ func enabledActions(cfg config.AndroidToolsConfig, clientType string) []androidA
 }
 
 // isActionDisabledByConfig checks if a specific action is disabled via the Actions struct.
-// Core actions (no category) are always enabled.
 func isActionDisabledByConfig(cfg config.AndroidToolsConfig, action string) bool {
 	switch action {
+	// App
+	case "search_apps":
+		return !cfg.App.Actions.SearchApps
+	case "app_info":
+		return !cfg.App.Actions.AppInfo
+	case "launch_app":
+		return !cfg.App.Actions.LaunchApp
+	// UI
+	case "screenshot":
+		return !cfg.UI.Actions.Screenshot
+	case "get_ui_tree":
+		return !cfg.UI.Actions.GetUITree
+	case "tap":
+		return !cfg.UI.Actions.Tap
+	case "swipe":
+		return !cfg.UI.Actions.Swipe
+	case "text":
+		return !cfg.UI.Actions.Text
+	case "keyevent":
+		return !cfg.UI.Actions.KeyEvent
+	// Intent
+	case "broadcast":
+		return !cfg.Intent.Actions.Broadcast
+	case "intent":
+		return !cfg.Intent.Actions.Intent
 	// Alarm
 	case "set_alarm":
 		return !cfg.Alarm.Actions.SetAlarm
@@ -346,13 +370,19 @@ func isActionDisabledByConfig(cfg config.AndroidToolsConfig, action string) bool
 	case "clipboard_read":
 		return !cfg.Clipboard.Actions.ClipboardRead
 	default:
-		return false // core actions are never disabled
+		return false // unknown actions are not disabled
 	}
 }
 
 // isCategoryEnabled checks if a given category is enabled in the config.
 func isCategoryEnabled(cfg config.AndroidToolsConfig, category string) bool {
 	switch category {
+	case "app":
+		return cfg.App.Enabled
+	case "ui":
+		return cfg.UI.Enabled
+	case "intent":
+		return cfg.Intent.Enabled
 	case "alarm":
 		return cfg.Alarm.Enabled
 	case "calendar":

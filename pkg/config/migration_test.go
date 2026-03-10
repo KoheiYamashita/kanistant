@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -164,7 +165,7 @@ func TestLoadConfig_NoMigrationWhenCurrent(t *testing.T) {
 	path := filepath.Join(tmpDir, "config.json")
 
 	// Write a config already at current version
-	data := `{"version":3,"llm":{"model":"test"}}`
+	data := fmt.Sprintf(`{"version":%d,"llm":{"model":"test"}}`, ConfigVersion)
 	if err := os.WriteFile(path, []byte(data), 0644); err != nil {
 		t.Fatal(err)
 	}

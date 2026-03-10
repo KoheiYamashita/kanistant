@@ -183,6 +183,26 @@ type MCPServerConfig struct {
 
 // ── Per-category action structs ──
 
+type AppActions struct {
+	SearchApps bool `json:"search_apps" label:"Search Apps"`
+	AppInfo    bool `json:"app_info"    label:"App Info"`
+	LaunchApp  bool `json:"launch_app"  label:"Launch App"`
+}
+
+type UIActions struct {
+	Screenshot bool `json:"screenshot"   label:"Screenshot"`
+	GetUITree  bool `json:"get_ui_tree"  label:"Get UI Tree"`
+	Tap        bool `json:"tap"          label:"Tap"`
+	Swipe      bool `json:"swipe"        label:"Swipe"`
+	Text       bool `json:"text"         label:"Text Input"`
+	KeyEvent   bool `json:"keyevent"     label:"Key Event"`
+}
+
+type IntentActions struct {
+	Broadcast bool `json:"broadcast" label:"Broadcast"`
+	Intent    bool `json:"intent"    label:"Send Intent"`
+}
+
 type AlarmActions struct {
 	SetAlarm     bool `json:"set_alarm"      label:"Set Alarm"`
 	SetTimer     bool `json:"set_timer"      label:"Set Timer"`
@@ -249,6 +269,21 @@ type ClipboardActions struct {
 
 // ── Category wrappers (Enabled toggle + Actions) ──
 
+type AppCategory struct {
+	Enabled bool       `json:"enabled" label:"App"`
+	Actions AppActions `json:"actions" label:""`
+}
+
+type UICategory struct {
+	Enabled bool      `json:"enabled" label:"UI Automation"`
+	Actions UIActions `json:"actions" label:""`
+}
+
+type IntentCategory struct {
+	Enabled bool          `json:"enabled" label:"Intent"`
+	Actions IntentActions `json:"actions" label:""`
+}
+
 type AlarmCategory struct {
 	Enabled bool         `json:"enabled" label:"Alarm"`
 	Actions AlarmActions `json:"actions" label:""`
@@ -302,6 +337,9 @@ type ClipboardCategory struct {
 
 type AndroidToolsConfig struct {
 	Enabled         bool                  `json:"enabled"                    label:"Enabled" env:"CLAWDROID_TOOLS_ANDROID_ENABLED"`
+	App             AppCategory           `json:"app"                       label:"App"`
+	UI              UICategory            `json:"ui"                        label:"UI Automation"`
+	Intent          IntentCategory        `json:"intent"                    label:"Intent"`
 	Alarm           AlarmCategory         `json:"alarm"                     label:"Alarm"`
 	Calendar        CalendarCategory      `json:"calendar"                  label:"Calendar"`
 	Contacts        ContactsCategory      `json:"contacts"                  label:"Contacts"`
@@ -505,6 +543,9 @@ func (c *Config) DataPath() string {
 // DefaultAndroidToolsConfig returns the default AndroidToolsConfig with
 // all categories and actions enabled (except Contacts/Communication for privacy).
 func DefaultAndroidToolsConfig() AndroidToolsConfig {
+	allApp := AppActions{SearchApps: true, AppInfo: true, LaunchApp: true}
+	allUI := UIActions{Screenshot: true, GetUITree: true, Tap: true, Swipe: true, Text: true, KeyEvent: true}
+	allIntent := IntentActions{Broadcast: true, Intent: true}
 	allAlarm := AlarmActions{SetAlarm: true, SetTimer: true, DismissAlarm: true, ShowAlarms: true}
 	allCalendar := CalendarActions{CreateEvent: true, QueryEvents: true, UpdateEvent: true, DeleteEvent: true, ListCalendars: true, AddReminder: true}
 	allContacts := ContactsActions{SearchContacts: true, GetContactDetail: true, AddContact: true}
@@ -518,6 +559,9 @@ func DefaultAndroidToolsConfig() AndroidToolsConfig {
 
 	return AndroidToolsConfig{
 		Enabled:       true,
+		App:           AppCategory{Enabled: true, Actions: allApp},
+		UI:            UICategory{Enabled: true, Actions: allUI},
+		Intent:        IntentCategory{Enabled: true, Actions: allIntent},
 		Alarm:         AlarmCategory{Enabled: true, Actions: allAlarm},
 		Calendar:      CalendarCategory{Enabled: true, Actions: allCalendar},
 		Contacts:      ContactsCategory{Enabled: false, Actions: allContacts},
