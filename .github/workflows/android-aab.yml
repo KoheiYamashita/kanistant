@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-aab:
-    name: Build Embedded AAB
+    name: Build Embedded Google Play AAB
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -46,10 +46,10 @@ jobs:
 
       - name: Build release AAB
         working-directory: android
-        run: ./gradlew bundleEmbeddedRelease
+        run: ./gradlew bundleEmbeddedGoogleplayRelease
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
-          name: clawdroid-embedded-release.aab
-          path: android/app/build/outputs/bundle/embeddedRelease/app-embedded-release.aab
+          name: clawdroid-embedded-googleplay-release.aab
+          path: android/app/build/outputs/bundle/embeddedGoogleplayRelease/*.aab

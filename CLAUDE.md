@@ -31,9 +31,12 @@ make run            # ビルド後に実行
 ```bash
 make build-android              # Go バックエンドを jniLibs としてビルド（全アーキテクチャ）
 make build-android-arm64        # arm64-v8a のみ
-cd android && ./gradlew assembleEmbeddedDebug   # Embedded フレーバー（Go バックエンド込み）
-cd android && ./gradlew assembleTermuxDebug      # Termux フレーバー（バックエンドなし）
+cd android && ./gradlew assembleEmbeddedDirectDebug       # Embedded + Direct
+cd android && ./gradlew assembleEmbeddedGoogleplayDebug   # Embedded + Google Play
+cd android && ./gradlew assembleTermuxDirectDebug         # Termux + Direct
 ```
+
+Android フレーバーは `variant`（`embedded` / `termux`）と `distribution`（`direct` / `googleplay`）の 2 軸。`termuxGoogleplay` は生成しない。
 
 ## 通信フロー
 

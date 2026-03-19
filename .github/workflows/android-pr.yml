@@ -25,7 +25,7 @@ jobs:
       - name: Run ktlint
         run: ./gradlew ktlintCheck
 
-  lint-termux:
+  lint-termux-direct:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -43,10 +43,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Run Android Lint (Termux)
-        run: ./gradlew :app:lintTermuxDebug
+      - name: Run Android Lint (Termux Direct)
+        run: ./gradlew :app:lintTermuxDirectDebug
 
-  lint-embedded:
+  lint-embedded-direct:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -64,10 +64,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Run Android Lint (Embedded)
-        run: ./gradlew :app:lintEmbeddedDebug
+      - name: Run Android Lint (Embedded Direct)
+        run: ./gradlew :app:lintEmbeddedDirectDebug
 
-  test-termux:
+  lint-embedded-googleplay:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -85,10 +85,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Run unit tests (Termux)
-        run: ./gradlew testTermuxDebugUnitTest
+      - name: Run Android Lint (Embedded Google Play)
+        run: ./gradlew :app:lintEmbeddedGoogleplayDebug
 
-  test-embedded:
+  test-termux-direct:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -106,22 +106,66 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Run unit tests (Embedded)
-        run: ./gradlew testEmbeddedDebugUnitTest
+      - name: Run unit tests (Termux Direct)
+        run: ./gradlew testTermuxDirectDebugUnitTest
+
+  test-embedded-direct:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run unit tests (Embedded Direct)
+        run: ./gradlew testEmbeddedDirectDebugUnitTest
+
+  test-embedded-googleplay:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run unit tests (Embedded Google Play)
+        run: ./gradlew testEmbeddedGoogleplayDebugUnitTest
 
   gate:
     if: always()
-    needs: [ktlint, lint-termux, lint-embedded, test-termux, test-embedded]
+    needs: [ktlint, lint-termux-direct, lint-embedded-direct, lint-embedded-googleplay, test-termux-direct, test-embedded-direct, test-embedded-googleplay]
     runs-on: ubuntu-latest
     steps:
       - name: Check results
         run: |
           for result in \
             "${{ needs.ktlint.result }}" \
-            "${{ needs.lint-termux.result }}" \
-            "${{ needs.lint-embedded.result }}" \
-            "${{ needs.test-termux.result }}" \
-            "${{ needs.test-embedded.result }}"; do
+            "${{ needs.lint-termux-direct.result }}" \
+            "${{ needs.lint-embedded-direct.result }}" \
+            "${{ needs.lint-embedded-googleplay.result }}" \
+            "${{ needs.test-termux-direct.result }}" \
+            "${{ needs.test-embedded-direct.result }}" \
+            "${{ needs.test-embedded-googleplay.result }}"; do
             if [ "$result" = "failure" ] || [ "$result" = "cancelled" ]; then
               exit 1
             fi

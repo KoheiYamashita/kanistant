@@ -15,8 +15,9 @@ Gradle マルチモジュール構成:
 
 ## ビルドフレーバー
 
-- `embedded`: Go バックエンドを `libclawdroid.so` として jniLibs に含む
-- `termux`: バックエンドなし（Termux 上で別途 Go バイナリを実行）
+- `variant`: `embedded`（Go バックエンドを `libclawdroid.so` として jniLibs に含む） / `termux`（バックエンドなし。Termux 上で別途 Go バイナリを実行）
+- `distribution`: `direct` / `googleplay`
+- `termuxGoogleplay` は `androidComponents.beforeVariants` で除外する
 
 ## 技術スタック
 
@@ -70,6 +71,6 @@ Gradle マルチモジュール構成:
 コード修正後は以下を実行して確認すること:
 1. `cd android && ./gradlew lint` — Lint チェック
 2. `cd android && ./gradlew test` — ユニットテスト実行
-3. `cd android && ./gradlew assembleEmbeddedDebug` — ビルド確認
+3. `cd android && ./gradlew assembleEmbeddedGoogleplayDebug` — Google Play 向け Embedded ビルド確認
 
 コードを修正したら、関連するテストも合わせて修正・追加すること。

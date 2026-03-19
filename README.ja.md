@@ -312,9 +312,9 @@ vi ~/.clawdroid/config.json
 
 LLM モデルと API キーを設定します。
 
-**5. Termux 版 APK のインストール**
+**5. 非組み込み版 APK のインストール**
 
-Termux フレーバーの APK（`clawdroid-noembedded-*.apk`）を同じデバイスにインストールします。
+`clawdroid-noembedded-*.apk` を同じデバイスにインストールします。
 
 **6. バックエンドの起動**
 
@@ -566,12 +566,20 @@ Android Studio で `android/` を開くか、Gradle でビルド:
 ```bash
 cd android
 
-# 組み込み版（Go バックエンドを APK に内蔵）
+# フレーバーマトリクス:
+# - variant: embedded / termux
+# - distribution: direct / googleplay
+# - termuxGoogleplay は除外
+#
+# 組み込み版 Direct（Go バックエンドを APK に内蔵）
 make build-android           # Go バックエンドを jniLibs としてビルド
-./gradlew assembleEmbeddedDebug
+./gradlew assembleEmbeddedDirectDebug
 
-# Termux 版（バックエンドなし）
-./gradlew assembleTermuxDebug
+# 組み込み版 Google Play
+./gradlew assembleEmbeddedGoogleplayDebug
+
+# Termux 版 Direct（バックエンドなし）
+./gradlew assembleTermuxDirectDebug
 ```
 
 パッケージ名: `io.clawdroid`

@@ -314,9 +314,9 @@ vi ~/.clawdroid/config.json
 
 Add your LLM model and API key.
 
-**5. Install the Termux APK**
+**5. Install the non-embedded APK**
 
-Install the Termux-flavor APK (`clawdroid-noembedded-*.apk`) on the same device.
+Install `clawdroid-noembedded-*.apk` on the same device.
 
 **6. Start the backend**
 
@@ -568,12 +568,20 @@ Open `android/` in Android Studio or build with Gradle:
 ```bash
 cd android
 
-# Embedded version (includes Go backend in APK)
+# Flavor matrix:
+# - variant: embedded / termux
+# - distribution: direct / googleplay
+# - termuxGoogleplay is excluded
+#
+# Embedded Direct (includes Go backend in APK)
 make build-android           # Build Go backend as jniLibs
-./gradlew assembleEmbeddedDebug
+./gradlew assembleEmbeddedDirectDebug
 
-# Termux version (no backend in APK)
-./gradlew assembleTermuxDebug
+# Embedded Google Play
+./gradlew assembleEmbeddedGoogleplayDebug
+
+# Termux Direct (no backend in APK)
+./gradlew assembleTermuxDirectDebug
 ```
 
 Package name: `io.clawdroid`

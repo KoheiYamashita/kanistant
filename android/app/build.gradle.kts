@@ -55,10 +55,12 @@ android {
         }
     }
 
-    flavorDimensions += "variant"
+    flavorDimensions += listOf("variant", "distribution")
     productFlavors {
         create("termux") { dimension = "variant" }
         create("embedded") { dimension = "variant" }
+        create("direct") { dimension = "distribution" }
+        create("googleplay") { dimension = "distribution" }
     }
 
     buildFeatures {
@@ -80,8 +82,10 @@ android {
     }
 
     sourceSets {
-        getByName("termux") { java.srcDirs("src/termux/java") }
-        getByName("embedded") { java.srcDirs("src/embedded/java") }
+        getByName("termux") { java.setSrcDirs(listOf("src/termux/java")) }
+        getByName("embedded") { java.setSrcDirs(listOf("src/embedded/java")) }
+        getByName("direct") { java.setSrcDirs(listOf("src/direct/java")) }
+        getByName("googleplay") { java.setSrcDirs(listOf("src/googleplay/java")) }
     }
 
     lint {
@@ -97,6 +101,16 @@ android {
 
     testOptions {
         unitTests.isReturnDefaultValues = true
+    }
+}
+
+androidComponents {
+    beforeVariants(
+        selector()
+            .withFlavor("variant" to "termux")
+            .withFlavor("distribution" to "googleplay"),
+    ) { variantBuilder ->
+        variantBuilder.enable = false
     }
 }
 

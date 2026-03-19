@@ -27,6 +27,7 @@ import java.util.UUID
 class GatewayProcessManager(
     private val context: Context,
     private val settingsStore: GatewaySettingsStore,
+    private val extraEnv: Map<String, String> = emptyMap(),
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val _state = MutableStateFlow(BackendState.STOPPED)
@@ -75,7 +76,7 @@ class GatewayProcessManager(
         _state.value = BackendState.STARTING
 
         val settings = settingsStore.settings.value
-        val env = mapOf(
+        val env = extraEnv + mapOf(
             "HOME" to context.filesDir.absolutePath,
             "CLAWDROID_GATEWAY_API_KEY" to settings.apiKey,
             "TZ" to java.util.TimeZone.getDefault().id,

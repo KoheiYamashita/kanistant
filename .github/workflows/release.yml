@@ -73,20 +73,20 @@ jobs:
             "$STORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > keystore.properties
 
       - name: Build release APK
-        run: ./gradlew assembleTermuxRelease
+        run: ./gradlew assembleTermuxDirectRelease
 
       - name: Upload APK to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          mv app/build/outputs/apk/termux/release/app-termux-release.apk \
-             app/build/outputs/apk/termux/release/clawdroid-noembedded-"$RELEASE_TAG".apk
+          mv app/build/outputs/apk/termuxDirect/release/app-termux-direct-release.apk \
+             app/build/outputs/apk/termuxDirect/release/clawdroid-noembedded-"$RELEASE_TAG".apk
           gh release upload "$RELEASE_TAG" \
-            app/build/outputs/apk/termux/release/clawdroid-noembedded-"$RELEASE_TAG".apk
+            app/build/outputs/apk/termuxDirect/release/clawdroid-noembedded-"$RELEASE_TAG".apk
 
-  build-android-embedded:
-    name: Android Embedded APKs
+  build-android-embedded-direct:
+    name: Android Embedded Direct APKs
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -131,33 +131,77 @@ jobs:
 
       - name: Build release APKs
         working-directory: android
-        run: ./gradlew assembleEmbeddedRelease -PenableAbiSplit
-
-      - name: Build release AAB
-        working-directory: android
-        run: ./gradlew bundleEmbeddedRelease
+        run: ./gradlew assembleEmbeddedDirectRelease -PenableAbiSplit
 
       - name: Upload APKs to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
-        working-directory: android/app/build/outputs/apk/embedded/release
+        working-directory: android/app/build/outputs/apk/embeddedDirect/release
         run: |
-          mv app-embedded-arm64-v8a-release.apk     clawdroid-"$RELEASE_TAG"-arm64-v8a.apk
-          mv app-embedded-armeabi-v7a-release.apk    clawdroid-"$RELEASE_TAG"-armeabi-v7a.apk
-          mv app-embedded-x86_64-release.apk         clawdroid-"$RELEASE_TAG"-x86_64.apk
-          mv app-embedded-universal-release.apk      clawdroid-"$RELEASE_TAG"-universal.apk
+          mv app-embedded-direct-arm64-v8a-release.apk  clawdroid-"$RELEASE_TAG"-arm64-v8a.apk
+          mv app-embedded-direct-armeabi-v7a-release.apk clawdroid-"$RELEASE_TAG"-armeabi-v7a.apk
+          mv app-embedded-direct-x86_64-release.apk      clawdroid-"$RELEASE_TAG"-x86_64.apk
+          mv app-embedded-direct-universal-release.apk   clawdroid-"$RELEASE_TAG"-universal.apk
           gh release upload "$RELEASE_TAG" \
             clawdroid-"$RELEASE_TAG"-arm64-v8a.apk \
             clawdroid-"$RELEASE_TAG"-armeabi-v7a.apk \
             clawdroid-"$RELEASE_TAG"-x86_64.apk \
             clawdroid-"$RELEASE_TAG"-universal.apk
 
+  build-android-embedded-googleplay:
+    name: Android Embedded Google Play AAB
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build Go binaries for Android
+        run: make build-android
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        working-directory: android
+        run: echo "$KEYSTORE_BASE64" | base64 -d > release.keystore
+
+      - name: Create keystore.properties
+        env:
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        working-directory: android
+        run: |
+          printf 'storeFile=release.keystore\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+            "$STORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > keystore.properties
+
+      - name: Build release AAB
+        working-directory: android
+        run: ./gradlew bundleEmbeddedGoogleplayRelease
+
       - name: Upload AAB to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
-        working-directory: android/app/build/outputs/bundle/embeddedRelease
+        working-directory: android/app/build/outputs/bundle/embeddedGoogleplayRelease
         run: |
-          mv app-embedded-release.aab clawdroid-"$RELEASE_TAG".aab
+          mv app-embedded-googleplay-release.aab clawdroid-"$RELEASE_TAG".aab
           gh release upload "$RELEASE_TAG" clawdroid-"$RELEASE_TAG".aab
